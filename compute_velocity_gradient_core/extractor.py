@@ -19,7 +19,7 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
     """
     
     if os.path.exists(output+'/velocity_gradient_tensor_' + cut + '.h5') and not reload:
-        print('---->VGT already extracted.')
+        print('----> VGT already extracted.')
         print(f'Reloading extracrted velocity gradient tensor from {output}/velocity_gradient_tensor_{cut}.h5')
         with h5py.File(output+'/velocity_gradient_tensor_' + cut + '.h5', 'r') as f:
             velocity = f['velocity'][:]
@@ -29,7 +29,7 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
             velocity = [v[:, :time] for v in velocity]
             print(f'---->Extracted velocity gradient tensor from h5 files with {time} time steps and {velocity_gradient.shape[2]} nodes.')
     else:
-        print('---->Extracting velocity gradient tensor from h5 files.\n')
+        print('----> Extracting velocity gradient tensor from h5 files.\n')
         r = Reader('hdf_antares')
         r['filename'] = arr[0]
         b = r.read()  # Base object of the Antares API

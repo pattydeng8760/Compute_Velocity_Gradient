@@ -567,7 +567,7 @@ def main():
     arr = sorted(glob.glob(file_dir))
     
     # Create an output directory if it does not exist
-    output = 'Velocity_Invarients_'+cut
+    output = 'Velocity_Invariants_'+cut
     if not os.path.exists(output):
         os.makedirs(output, exist_ok=True)
     
