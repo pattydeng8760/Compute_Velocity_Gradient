@@ -66,10 +66,12 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     var_A, var_S, var_Omega = [np.zeros([node],dtype='float32') for _ in range(3)]
     strain_rate_mean, rotation_rate_mean, strain_rate_fluc_rms, rotation_rate_fluc_rms = [np.zeros([node],dtype='float32') for _ in range(4)]
     # Reassemble the global result array
-    for Q_S_part, R_S_part, Q_W_part, var_A_part, var_S_part, var_Omega_part, strain_rate_mean_part,block_num in results:
+    for Q_S_part, R_S_part, Q_W_part, var_A_part, var_S_part, var_Omega_part, strain_rate_mean_part, rotation_rate_mean_part, strain_rate_rms_part, rotation_rate_rms_part, block_num in results:
         indices = node_indices[block_num]
         Qs[indices, :],Rs[indices, :], Qw[indices, :] = Q_S_part, R_S_part, Q_W_part
-        var_A[indices], var_S[indices], var_Omega[indices], strain_rate_mean[indices] = var_A_part, var_S_part, var_Omega_part, strain_rate_mean_part
+        var_A[indices], var_S[indices], var_Omega[indices],  = var_A_part, var_S_part, var_Omega_part
+        strain_rate_mean[indices], rotation_rate_mean[indices] = strain_rate_mean_part, rotation_rate_mean_part
+        strain_rate_fluc_rms[indices], rotation_rate_fluc_rms[indices] = strain_rate_rms_part, rotation_rate_rms_part
     del results         # Free up memory
     print('\n---->Saving results...')
     #print('Saving mean Qs, Rs, Qw')
