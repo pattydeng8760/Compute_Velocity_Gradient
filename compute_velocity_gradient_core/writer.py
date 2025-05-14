@@ -63,7 +63,8 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
 def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     # Initialize arrays for final results
     Qs,Rs,Qw = [np.zeros([node, time],dtype='float32') for _ in range(3)]
-    var_A, var_S, var_Omega, strain_rate_mean = [np.zeros([node],dtype='float32') for _ in range(4)]
+    var_A, var_S, var_Omega = [np.zeros([node],dtype='float32') for _ in range(3)]
+    strain_rate_mean, rotation_rate_mean, strain_rate_fluc_rms, rotation_rate_fluc_rms = [np.zeros([node],dtype='float32') for _ in range(4)]
     # Reassemble the global result array
     for Q_S_part, R_S_part, Q_W_part, var_A_part, var_S_part, var_Omega_part, strain_rate_mean_part,block_num in results:
         indices = node_indices[block_num]
@@ -87,6 +88,9 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     b[0][0]['Variance S'] = var_S
     b[0][0]['Variance Omega'] = var_Omega
     b[0][0]['Mean strain_rate'] = strain_rate_mean
+    b[0][0]['Mean rotation_rate'] = rotation_rate_mean
+    b[0][0]['Mean strain_rate_fluc_rms'] = strain_rate_fluc_rms
+    b[0][0]['Mean rotation_rate_fluc_rms'] = rotation_rate_fluc_rms
     w = Writer('hdf_antares')  # This is another format (still hdf5)
     w['base'] = b[:, :, ['x', 'y', 'z', 'Qs', 'Rs', 'Qw', 'Variance Qs', 'Variance Rs', 'Variance Qw','Variance A','Variance S','Variance Omega','Mean strain_rate']]
     w['filename'] = filename
@@ -104,5 +108,8 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
         f.create_dataset('Variance S', data=var_S, dtype='float32')
         f.create_dataset('Variance Omega', data=var_Omega, dtype='float32')
         f.create_dataset('Mean strain_rate', data=strain_rate_mean, dtype='float32')
+        f.create_dataset('Mean rotation_rate', data=rotation_rate_mean, dtype='float32')
+        f.create_dataset('Mean strain_rate_fluc_rms', data=strain_rate_fluc_rms, dtype='float32')
+        f.create_dataset('Mean rotation_rate_fluc_rms', data=rotation_rate_fluc_rms, dtype='float32')
     print('    Full Qs, Rs, Qw appended to {0:s}.'.format(output_file))
     #print('\n---->File saving complete.')

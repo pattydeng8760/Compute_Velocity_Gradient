@@ -60,23 +60,24 @@ def compute_SQW_vectorized(images_part, block_num):
     A_fluc_sq = np.sum(A_fluc**2, axis=(0, 1))          # shape: (node_count, time_int)
     var_A = np.mean(A_fluc_sq, axis=1)                  # shape: (node_count,)
     
-    # 3. Compute full S and Ω for invariants (using the full tensor, not the fluctuation)
+    # 3. Compute full S and Ω for invariants (using the full tensor, not the fluctuation) and the fluctuating component
     S_full = 0.5 * (images_part + images_part.swapaxes(0, 1))    # shape: (3,3,node_count,time_int)
     Omega_full = 0.5 * (images_part - images_part.swapaxes(0, 1))  # shape: (3,3,node_count,time_int)
     
-    # Compute invariants from the full tensors:
-    # Qs = -0.5 * (S_full_ij * S_full_ij)
+    # 4. Compute invariants from the full tensors:
     S_full_sq = np.sum(S_full**2, axis=(0, 1))          # shape: (node_count, time_int)
     Qs = -0.5 * S_full_sq                               # shape: (node_count, time_int)
-    strain_rate_mean = np.mean(np.sqrt(2 * np.sum(S_full**2, axis=(0, 1))),axis=1)
-    # Rs = -1/3 * (S_full_ij * S_full_jk * S_full_ki)
     Rs = -1.0/3.0 * np.einsum('ijnt,jknt,kint->nt', S_full, S_full, S_full)  # shape: (node_count, time_int)
-    
-    # Qw = 0.5 * (Omega_full_ij * Omega_full_ij)
     Omega_full_sq = np.sum(Omega_full**2, axis=(0, 1))  # shape: (node_count, time_int)
     Qw = 0.5 * Omega_full_sq                            # shape: (node_count, time_int)
     
-    # 4. Normalize the invariants using the variance from the fluctuating components
+    # 5. Comptue the instantaneous mean (fluctuating) RMS strain rate and rotation rate
+    strain_rate_mean = np.mean(np.sqrt(2 * np.sum(S_full**2, axis=(0, 1))),axis=1)              # shape: (node_count,)
+    rotation_rate_mean = np.mean(np.sqrt(2 * np.sum(Omega_full**2, axis=(0, 1))),axis=1)        # shape: (node_count,)
+    strain_rate_fluc_rms = np.sqrt(np.mean(2 * np.sum(S_fluc**2, axis=(0, 1)), axis=1))     # shape: (node_count,)
+    rotation_rate_fluc_rms = np.sqrt(np.mean(2 * np.sum(Omega_fluc**2, axis=(0, 1)), axis=1))   # shape: (node_count,)
+    
+    # 6. Normalize the invariants using the variance from the fluctuating components
     #Qs_norm = Qs/(strain_rate_mean[:,None])             # normalized with  var_S
     #Qs_norm = Qs / (var_S[:, None])             #   ormalized with  var_S
     #Rs_norm = Rs/(strain_rate_mean[:,None]**3/2)             # normalized with  var_S
@@ -86,7 +87,7 @@ def compute_SQW_vectorized(images_part, block_num):
 
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
         print(f'    Processing iteration block number {block_num+1}')
-    return Qs, Rs, Qw, var_A, var_S, var_Omega, strain_rate_mean, block_num
+    return Qs, Rs, Qw, var_A, var_S, var_Omega, strain_rate_mean, rotation_rate_mean, strain_rate_fluc_rms, rotation_rate_fluc_rms, block_num
 
 
 # THE following function is depricated and not used in the code, replaced by the vectorized version above

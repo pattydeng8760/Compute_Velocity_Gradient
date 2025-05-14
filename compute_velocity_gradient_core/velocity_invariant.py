@@ -91,7 +91,7 @@ class VelocityInvariant:
         print(f'Number of time steps: {time_steps}')
         blocks = [(velocity_gradient[:, :, indices, :], block_num) for block_num, indices in enumerate(node_indices)]
         
-        return velocity, node_count, node_indicies, time_steps, blocks
+        return velocity, node_count, node_indices, time_steps, blocks
 
     @timer
     def run(self):
