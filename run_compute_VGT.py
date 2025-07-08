@@ -9,12 +9,16 @@ from compute_velocity_gradient_core.velocity_invariant import main
 from compute_velocity_gradient_core.utils import init_logging_from_cut
 
 config = {
-    "cut"        : "PIV2",
-    "parent_dir" : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface",
-    "output_dir" : ".",        # ← add this line
+    "cut"        : "PIV1",
+    #"parent_dir" : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface",
+    'parent_dir' : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data",
+    "output_dir" : ".",
     "nproc"      : 8,
     "reload"     : False,
-    "nblocks"    : 1200
+    "nblocks"    : 1200, 
+    "data_type"  : "PIV",
+    "velocity"   : 30,
+    "angle_of_attack": 10,  
 }
 
 args = Namespace(**config)

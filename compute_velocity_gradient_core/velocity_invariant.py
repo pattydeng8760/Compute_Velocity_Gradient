@@ -14,8 +14,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--cut", "-c",
-        type=str,
-        required=True,
+        type=str, required=True,
         help="Cutplane identifier (e.g., '030_TE'). Directory is Cut_<cut>_VGT/ under parent_dir."
     )
     parser.add_argument(
@@ -47,6 +46,23 @@ def parse_arguments():
         default=1000,
         help="How many blocks to split the nodes into for parallelism."
     )
+    parser.add_argument(
+        "--data-type", "-d",
+        type=str,
+        default="LES",
+        choices=["LES", "PIV"],
+        help="Type of data to extract the velocity gradient tensor from. Defaults to 'LES'. Can be 'LES' or 'PIV'."
+    )
+    parser.add_argument(
+        "--velocity", "-v",
+        type=int, default = 30,
+        help="The freestream velocity of the data."
+    )
+    parser.add_argument(
+        "--angle-of-attack", "-aoa",
+        type=float, default=10.0,
+        help="Angle of attack of the data in degrees."
+    )
     return parser.parse_args()
 
 
@@ -57,11 +73,20 @@ class VelocityInvariant:
         self.parent_dir = args.parent_dir
         self.nproc      = args.nproc
         self.nblocks    = args.nblocks
-        self.output  = os.path.join(args.output_dir,f"Velocity_Invariants_{self.cut}")
+        self.data_type = args.data_type
+        self.velocity    = args.velocity
+        self.angle_of_attack = args.angle_of_attack
+        self.output  = os.path.join(args.output_dir,f"Velocity_Invariants_{self.cut}_{self.data_type}")
         if not os.path.exists(self.output):
             os.makedirs(self.output, exist_ok=True)
-
-        pattern      = os.path.join(self.parent_dir, f"Cut_{self.cut}_VGT", "*.h5")
+        if self.data_type == 'LES':
+            pattern = os.path.join(self.parent_dir, f"Cut_{self.cut}_VGT", "*.h5")
+        elif self.data_type == 'PIV':
+            cut_map = {
+            "10": {"PIV1": "058","PIV2": "078","PIV3": "105"},
+            "5": {"PIV1": "060","PIV2": "080"}}
+            mapped_cut = cut_map[str(self.angle_of_attack)][self.cut]
+            pattern = os.path.join(self.parent_dir, f"AoA{str(int(self.angle_of_attack))}_xc_{mapped_cut}",f"U{str(int(self.velocity ))}","PIV_Data","*.h5")
         self.arr     = sorted(glob.glob(pattern))
         if not self.arr:
             raise FileNotFoundError(f"No files found matching: {pattern}")
@@ -71,7 +96,8 @@ class VelocityInvariant:
         return (
             f"VelocityInvariant(cut={self.cut}, reload={self.reload}, "
             f"parent_dir={self.parent_dir}, nproc={self.nproc}, "
-            f"nblocks={self.nblocks}, output_dir={self.output})"
+            f"nblocks={self.nblocks}, output_dir={self.output},"
+            f"data_type={self.data_type})"
         )
         
     def extract_velocity_gradient(self):
@@ -96,14 +122,16 @@ class VelocityInvariant:
     @timer
     def run(self):
         print(f"\n{'Performing velocity gradient invariants computation.':=^100}\n")
-        # 1) extract
+        # 1) extract the velocity gradient tensor and velocity from the cut
         velocity_gradient, velocity = extract_gradient(
-            self.arr, self.cut, self.reload, self.output, time=None
+            self.arr, self.cut, self.reload, self.output, time=None, data_type=self.data_type
         )
         node_count, time_steps = velocity_gradient.shape[2], velocity_gradient.shape[3]
+        
         # 2) determine processes
         avail = cpu_count()
         nproc = min(avail, self.nproc)
+        
         # 3) split nodes into blocks
         node_indices = np.array_split(np.arange(node_count), self.nblocks)
         print('\n---->Partitioning data into {0:d} blocks.'.format(len(node_indices)))
@@ -111,10 +139,9 @@ class VelocityInvariant:
         print(f'Number of nodes: {node_count}')
         print(f'Number of time steps: {time_steps}')
         blocks = [(velocity_gradient[:, :, indices, :], block_num) for block_num, indices in enumerate(node_indices)]
-        
         del velocity_gradient  # free memory
-        
         print('\n----> Perofrming Parallel VGT Invariant Calculations...')
+        
         # 4) compute PQR
         with Pool(nproc) as pool:
             pqr_results = pool.starmap(compute_PQR_vectorized, blocks)
@@ -139,7 +166,7 @@ def main(args=None):
     if args is None:
         args = parse_arguments()
     # Redirect stdout to log_<cut>.txt and set up logging
-    init_logging_from_cut(args.cut)
+    init_logging_from_cut(args.cut,args.data_type)
     # Build and run
     runner = VelocityInvariant(args)
     runner.run()

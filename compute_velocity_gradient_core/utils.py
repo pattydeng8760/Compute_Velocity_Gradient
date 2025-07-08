@@ -7,8 +7,8 @@ def print(text, **kwargs):
 def setup_logging(log_file):
     sys.stdout = open(log_file, "w", buffering=1)
 
-def init_logging_from_cut(cut):
-    log_file = f"log_invariants_{cut}.txt"
+def init_logging_from_cut(cut,data_type):
+    log_file = f"log_invariants_{cut}_{data_type}.txt"
     setup_logging(log_file)
 
 def timer(func):
