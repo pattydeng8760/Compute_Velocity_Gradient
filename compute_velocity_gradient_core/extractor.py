@@ -24,8 +24,7 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
     ('grad_v_x', 'node'), ('grad_v_y', 'node'), ('grad_v_z', 'node'),
     ('grad_w_x', 'node'), ('grad_w_y', 'node'), ('grad_w_z', 'node')]
 
-    print(f'----> Extracting velocity gradient tensor from h5 files with {data_type} Data.\n')
-    print(arr[0])
+    print(f'----> Extracting velocity gradient tensor from h5 files with {data_type} Data.')
     otuput_file_name = 'velocity_gradient_tensor_' + cut + '_' + data_type + '.h5'
     if os.path.exists(os.path.join(output,otuput_file_name)) and not reload:
         print('----> VGT already extracted.')
@@ -44,18 +43,18 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
         # Initialize the velocity and velocity gradient tensor
         velocity = [np.zeros((np.shape(b[0][0]['u'])[0], len(arr)), dtype='float32') for _ in range(5)]
         gradients = [np.zeros((np.shape(b[0][0]['grad_u_x'])[0], len(arr)), dtype='float32') for _ in range(9)]
-
+        print("    The shape of the velocity vector is (nodes, time): ", velocity[0].shape)
+        print("    The shape of the velocity gradient tensor is (nodes, time): ", gradients[0].shape)
         # Check the velocity gradient tensor components
         missing_keys = [key for key in VGT_keys if key not in b[0][0].keys()]
         if missing_keys:
             raise KeyError(f"The following required fields in the velocity gradient tensor are missing: {missing_keys}")
         else: 
             print('    All required fields in the velocity gradient tensor are present.')
-
+        print(f'\nExtracting data files from driectory {os.path.dirname(arr[0])}...')
         for idx, file in enumerate(arr):
-            print(f'    Extracting data files from driectory {os.path.dirname(file)}')
             if idx % 100 == 0 or idx == 0 or idx == len(arr)-1:
-                print(f'     Extracting file {idx+1}/{len(arr)}: {os.path.basename(file)}')
+                print(f'     Extracting file {idx}/{len(arr)}: {os.path.basename(file)}')
             r['filename'] = file
             b = r.read()
             # Extract ther velcoity vector
