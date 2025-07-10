@@ -54,7 +54,6 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
         - Airfoil mask is only saved for non-PIV3 cases
         - File naming follows the pattern: {type}_{cut}.{ext}
     """
-    print('Saving data files')
 
     # Saving the grid data for plotting
     chord = 0.3048

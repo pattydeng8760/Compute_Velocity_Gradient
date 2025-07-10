@@ -131,8 +131,8 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     Plots and saves the vortex core detection results using advanced visualization methods.
     Loads data from numpy files in the output directory.
     """
-    print('Plotting vortex core figures')
-    print(f'Loading data from: {output_dir}')
+    print('----> Plotting vortex core figures')
+    print(f'    Loading data from: {output_dir}')
     
     # Load grid and vortex core data from files
     try:
@@ -322,8 +322,8 @@ def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.
     Plots and saves the probability distribution of vortex wandering.
     Loads data from numpy files in the output directory.
     """
-    print('Plotting probability distribution')
-    print(f'Loading difference data from: {output_dir}')
+    print('----> Plotting probability distribution')
+    print(f'    Loading difference data from: {output_dir}')
     
     # Load vortex difference data from files
     try:
@@ -426,10 +426,10 @@ def plot_all_results(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     Creates all vortex detection plots and saves them.
     Loads all data from numpy files in the output directory.
     """
-    print('Creating comprehensive vortex detection plots')
-    print(f'Data directory: {output_dir}')
-    print(f'Cut location: {cut_loc}')
-    print(f'Data type: {data_type}')
+    print('----> Creating comprehensive vortex detection plots:')
+    print(f'    Data directory: {output_dir}')
+    print(f'    Cut location: {cut_loc}')
+    print(f'    Data type: {data_type}')
     
     # Create main vortex core plot
     plot_vortex_cores(cut_loc, output_dir, chord, data_type)
@@ -437,4 +437,4 @@ def plot_all_results(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     # Create probability distribution plot
     plot_probability_distribution(cut_loc, output_dir, data_type, chord)
     
-    print('All plots saved successfully')
+    print('    All plots saved successfully')
