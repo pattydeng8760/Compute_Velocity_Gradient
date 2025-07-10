@@ -20,7 +20,7 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
     print('\n----> Saving results...')
     #print('Saving mean PQR')
     # Saving the output mean PQR for visualization
-    filename = os.path.join(output,'Velocity_Invarients_' + cut + '_Mean')
+    filename = os.path.join(output,'Velocity_Invariants_' + cut + '_Mean')
     r = Reader('hdf_antares')
     r['filename'] = arr[0]          # use the first file to get the base object and overwrite the file contents 
     b = r.read()  # b is the Base object of the Antares API
@@ -43,7 +43,7 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
     
     #print('Saving Full PQR')
     # Saving the full VGT result as h5 file
-    output_file = os.path.join(output, 'Velocity_Invarients_' + cut + '.h5')
+    output_file = os.path.join(output, 'Velocity_Invariants_' + cut + '.h5')
     with h5py.File(output_file, 'w') as f:
         f.create_dataset('P', data=P_final, dtype='float32')
         f.create_dataset('Q', data=Q_final, dtype='float32')
@@ -76,7 +76,7 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     print('\n---->Saving results...')
     #print('Saving mean Qs, Rs, Qw')
     # Saving the output mean PQR for visualization
-    filename = os.path.join(output,'Velocity_Invarients_Rotation_Strain_' + cut + '_Mean')
+    filename = os.path.join(output,'Velocity_Invariants_Rotation_Strain_' + cut + '_Mean')
     r = Reader('hdf_antares')
     r['filename'] = arr[0]
     b = r.read()  # b is the Base object of the Antares API
@@ -101,7 +101,7 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     
     #print('Saving Full Qs, Rs, Qw')
     # Saving the full VGT result as h5 file
-    output_file = os.path.join(output, 'Velocity_Invarients_' + cut + '.h5')
+    output_file = os.path.join(output, 'Velocity_Invariants_' + cut + '.h5')
     with h5py.File(output_file, 'a') as f:
         f.create_dataset('Qs', data=Qs, dtype='float32')
         f.create_dataset('Rs', data=Rs, dtype='float32')
