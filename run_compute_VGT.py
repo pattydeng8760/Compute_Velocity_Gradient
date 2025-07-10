@@ -13,7 +13,7 @@ config = {
     #"parent_dir" : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface",
     'parent_dir' : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data",
     "output_dir" : ".",
-    "nproc"      : 8,
+    "nproc"      : 16,
     "reload"     : False,
     "nblocks"    : 1200, 
     "data_type"  : "PIV",
@@ -21,5 +21,6 @@ config = {
     "angle_of_attack": 10,  
 }
 
-args = Namespace(**config)
-main(args)
+if __name__ == "__main__":
+    args = Namespace(**config)
+    main(args)
