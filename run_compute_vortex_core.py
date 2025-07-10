@@ -15,10 +15,10 @@ config = {
     "output_dir"     : ".",
     "nproc"          : 16,
     "method"         : "precise",
-    "max_file"       : None,
+    "max_file"       : 16,
     "angle_of_attack": 10,
     "plot"           : True,
-    "chord"          : 0.3048,
+    "chord"          : 0.3048
 }
 
 if __name__ == "__main__":

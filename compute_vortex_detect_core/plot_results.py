@@ -243,9 +243,9 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
                 ha='left', va='center', color='black')
     
     # Scale and plot vortex core locations
-    label_secondary = "Secondary \\nVortex"
-    label_primary = "Primary \\nVortex"
-    label_tertiary = "Tertiary \\nVortex"
+    label_secondary = "Secondary \nVortex"
+    label_primary = "Primary \nVortex"
+    label_tertiary = "Tertiary \nVortex"
     
     P_core_loc_scaled = scale_points(P_core_loc, 0.7)
     S_core_loc_scaled = scale_points(S_core_loc, 0.7)
@@ -266,10 +266,10 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
         label_primary, label_secondary, label_tertiary = "", "", ""
     
     # Plot PCA axes
-    plot_pca_axis(S_core_loc_scaled, color='red', label="Secondary Vortex \\nPrincipal Axis", scale=1.9)
-    plot_pca_axis(P_core_loc_scaled, color='orange', label="Primary Vortex \\nPrincipal Axis", scale=1.7)
+    plot_pca_axis(S_core_loc_scaled, color='red', label="Secondary Vortex \nPrincipal Axis", scale=1.9)
+    plot_pca_axis(P_core_loc_scaled, color='orange', label="Primary Vortex \nPrincipal Axis", scale=1.7)
     if tertiary and len(T_core_loc) > 0:
-        plot_pca_axis(T_core_loc_scaled, color='green', label="Tertiary Vortex \\nPrincipal Axis", scale=1.7)
+        plot_pca_axis(T_core_loc_scaled, color='green', label="Tertiary Vortex \nPrincipal Axis", scale=1.7)
     
     # Set plot properties
     plt.xlabel('$y/c$', fontsize=MEDIUM_SIZE)
@@ -300,7 +300,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     cb = plt.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=custom_cmap), cax=ax_cb,
                       ticks=np.linspace(-100, 100, 9))
     cb.ax.tick_params(labelsize=12)
-    cb.set_label(r'$\\omega c/U_{\\infty}$', rotation=90)
+    cb.set_label(r'$\omega c/U_{\infty}$', rotation=90)
     
     colorbar_filename = f'B_10AOA_{data_type}_{cut_loc}_Vort_Cores_colorbar'
     fig_cb.tight_layout()
