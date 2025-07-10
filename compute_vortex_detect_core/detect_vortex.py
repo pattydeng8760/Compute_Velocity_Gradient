@@ -56,7 +56,8 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
     for file_idx, file_path in enumerate(file_block):
         try:
             # Progress reporting every 10 files
-            print(f"Block {block_num}: Processing file {file_idx + 1}/{total_files_in_block}")
+            if (file_idx + 1) % 10 == 0:
+                print(f"    Block {block_num}: Processing file {file_idx + 1}/{total_files_in_block}")
             
             r = Reader('hdf_antares')
             r['filename'] = file_path
@@ -104,7 +105,7 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
             continue  # Skip to the next file
     
     # Final progress report for the block
-    print(f"Block {block_num}: Completed processing {total_files_in_block} files")
+    print(f"    Block {block_num}: Completed processing {total_files_in_block} files")
     
     # Convert lists to numpy arrays
     aggregated_u = np.array(aggregated_u)
@@ -181,8 +182,9 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
         - Tertiary vortex detection depends on the cut location
         - Results are automatically saved to numpy and MATLAB files
     """
-    print(f'The source directory is: {source_dir}')
-    print(f'The cut location is: {cut}')
+    print('\n----> Data Source Information:')
+    print(f'    Source directory: {source_dir}')
+    print(f'    Cut location: {cut}')
     
     # Get window boundaries for the given cut location
     try:
@@ -204,7 +206,7 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
         source_files = source_files[:max_file]
     
     total_files = len(source_files)
-    print(f"Total number of files to process: {total_files}")
+    print(f'    Total number of files to process: {total_files}')
 
     if total_files == 0:
         print("No .h5 files found in the source directory.")
@@ -218,12 +220,13 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
     if nproc > total_files:
         nproc = total_files
     
-    print(f"Number of available parallel compute processes: {nproc}")
-    print(f"Number of parallel tasks (blocks): {nproc}")
+    print('\n----> Parallel Processing Configuration:')
+    print(f'    Number of available parallel compute processes: {nproc}')
+    print(f'    Number of parallel tasks (blocks): {nproc}')
 
     # Split the data_files into nproc roughly equal blocks
     file_blocks = np.array_split(source_files, nproc)
-    print(f"Data files split into {nproc} blocks.")
+    print(f'    Data files split into {nproc} blocks.')
     
     # Create blocks with additional parameters for starmap
     blocks = [(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_WindowUR, TV_WindowLL, TV_WindowUR, cut, block_num) 
@@ -235,7 +238,8 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
     with Pool(nproc) as pool:
         results = pool.starmap(process_file_block, blocks)
     
-    print("File processing complete.")
+    print('\n----> File Processing Results:')
+    print('    File processing complete.')
     
     # Initialize lists to collect results
     aggregated_u, aggregated_v, aggregated_w, aggregated_vort = [], [], [], []

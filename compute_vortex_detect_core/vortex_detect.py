@@ -105,15 +105,25 @@ class VortexDetect:
         if self.nproc is None:
             self.nproc = multiprocessing.cpu_count()
         
-        print(f"Using {self.nproc} parallel tasks.")
-        
     def run(self):
         """Run the complete vortex detection pipeline."""
         t = time.time()
         
-        print(f"Starting vortex detection for cut: {self.cut}")
-        print(f"Source directory: {self.source_dir}")
-        print(f"Output directory: {self.sol_dir}")
+        print(f"\n{'Performing vortex detection analysis.':=^100}\n")
+        
+        # Print setup information
+        print('\n----> Input Parameters:')
+        print(f'    Data type: {self.data_type}')
+        print(f'    Cut: {self.cut}')
+        print(f'    Parent directory: {self.parent_dir}')
+        print(f'    Source directory: {self.source_dir}')
+        print(f'    Output directory: {self.sol_dir}')
+        print(f'    Number of processes: {self.nproc}')
+        print(f'    Detection method: {self.method}')
+        print(f'    Max files (testing): {self.max_file if self.max_file else "None"}')
+        print(f'    Angle of attack: {self.alpha}')
+        print(f'    Chord length: {self.chord}')
+        print(f'    Generate plots: {self.plot}')
         
         # Detect vortices
         S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars = detect_vortex(
@@ -131,7 +141,9 @@ class VortexDetect:
             plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
         
         elapsed = time.time() - t
-        print(f'The total calculation time is: {elapsed:1.0f} s')
+        print(f"\n{'Vortex detection analysis complete.':=^100}\n")
+        print('\n----> Timing Information:')
+        print(f'    Total calculation time: {elapsed:1.0f} s')
         
         return S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars
 

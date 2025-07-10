@@ -122,6 +122,20 @@ class VelocityInvariant:
     @timer
     def run(self):
         print(f"\n{'Performing velocity gradient invariants computation.':=^100}\n")
+        
+        # Print setup information
+        print('\n----> Input Parameters:')
+        print(f'    Cut: {self.cut}')
+        print(f'    Data type: {self.data_type}')
+        print(f'    Parent directory: {self.parent_dir}')
+        print(f'    Output directory: {self.output}')
+        print(f'    Number of processes: {self.nproc}')
+        print(f'    Number of blocks: {self.nblocks}')
+        print(f'    Reload: {self.reload}')
+        print(f'    Velocity: {self.velocity}')
+        print(f'    Angle of attack: {self.angle_of_attack}')
+        print(f'    Total files found: {len(self.arr)}')
+        
         # 1) extract the velocity gradient tensor and velocity from the cut
         velocity_gradient, velocity = extract_gradient(
             self.arr, self.cut, self.reload, self.output, time=None, data_type=self.data_type
@@ -134,10 +148,10 @@ class VelocityInvariant:
         
         # 3) split nodes into blocks
         node_indices = np.array_split(np.arange(node_count), self.nblocks)
-        print('\n---->Partitioning data into {0:d} blocks.'.format(len(node_indices)))
-        print(f'Number of available parallel compute processes: {nproc}')
-        print(f'Number of nodes: {node_count}')
-        print(f'Number of time steps: {time_steps}')
+        print('\n----> Partitioning data into {0:d} blocks.'.format(len(node_indices)))
+        print(f'    Number of available parallel compute processes: {nproc}')
+        print(f'    Number of nodes: {node_count}')
+        print(f'    Number of time steps: {time_steps}')
         blocks = [(velocity_gradient[:, :, indices, :], block_num) for block_num, indices in enumerate(node_indices)]
         del velocity_gradient  # free memory
         print('\n----> Perofrming Parallel VGT Invariant Calculations...')
