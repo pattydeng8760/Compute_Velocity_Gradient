@@ -53,11 +53,13 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
     # Progress tracking
     total_files_in_block = len(file_block)
     
+    # Print files being assessed for this block
+    print(f"    Block {block_num}: Processing {total_files_in_block} files")
     for file_idx, file_path in enumerate(file_block):
+        file_name = os.path.basename(file_path)
+        print(f"        File {file_idx + 1}/{total_files_in_block}: {file_name}")
+        
         try:
-            # Progress reporting every 10 files
-            if (file_idx + 1) % 10 == 0:
-                print(f"    Block {block_num}: Processing file {file_idx + 1}/{total_files_in_block}")
             
             r = Reader('hdf_antares')
             r['filename'] = file_path
@@ -310,5 +312,8 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
         T_Vortex, T_Vort_Diff = [], [] 
     
     # Saving data
+    print('\n----> Saving Results:')
+    print(f'    Saving processed data to: {output_dir}')
     save_data(Vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, output_dir, tertiary)
+    print('    Data saved successfully')
     return S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars
