@@ -5,6 +5,9 @@ from argparse import Namespace
 # make sure this path points to where your module lives locally!
 sys.path.insert(0, "./Compute_Velocity_Gradient")
 
+# Add window bounds to sys.path
+sys.path.insert(0, "/project/p/plavoie/denggua1/Coordinates")
+
 from compute_vortex_detect_core.vortex_detect import main
 from compute_vortex_detect_core.utils import init_logging_from_cut
 
