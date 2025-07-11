@@ -6,13 +6,13 @@ from functools import wraps
 
 def print(*args, **kwargs):
     """Custom print function that also logs to file."""
-    # Print to stdout
-    __builtins__['print'](*args, **kwargs)
-    
-    # Log to file if logging is configured
+    # If logging is configured, use logging (which handles both file and console)
     if logging.getLogger().hasHandlers():
         message = ' '.join(str(arg) for arg in args)
         logging.info(message)
+    else:
+        # If no logging configured, use built-in print
+        __builtins__['print'](*args, **kwargs)
 
 def setup_logging(log_file):
     sys.stdout = open(log_file, "w", buffering=1)
