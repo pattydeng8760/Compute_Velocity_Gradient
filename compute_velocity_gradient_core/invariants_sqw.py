@@ -1,5 +1,5 @@
 import numpy as np
-from .utils import print_custom
+from .utils import print
 
 def compute_SQW_vectorized(images_part, block_num):
     """
@@ -86,7 +86,7 @@ def compute_SQW_vectorized(images_part, block_num):
     #Qw_norm = Qw / var_Omega[:, None]     # normalized with var_Omega
 
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'    Processing iteration block number {block_num+1}')
+        print(f'    Processing iteration block number {block_num+1}')
     return Qs, Rs, Qw, var_A, var_S, var_Omega, strain_rate_mean, rotation_rate_mean, strain_rate_fluc_rms, rotation_rate_fluc_rms, block_num
 
 
@@ -114,7 +114,7 @@ def compute_SQW_invariants(images_part, block_num):
     Q_W_part = np.zeros((node_count, time_int))
     
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'    Processing iteration block number {block_num+1}')
+        print(f'    Processing iteration block number {block_num+1}')
         
     # Compute invariants at each node
     for node_idx in range(node_count):

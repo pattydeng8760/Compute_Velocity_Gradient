@@ -16,10 +16,10 @@ sys.stdout = open(os.path.join('log_invariants_'+str(argv[1])+'.txt'), "w", buff
 counter = Value('i', 0)
 counter_lock = Lock()
 # Printing any on-screen print functions into a log file
-def print_custom(text:str,**kwargs):
+def print(text:str,**kwargs):
     """ print function to print to the screen and to a log file
     """
-    builtins.print_custom(text,**kwargs)
+    builtins.print(text,**kwargs)
     os.fsync(sys.stdout)
 
 def timer(func):
@@ -29,7 +29,7 @@ def timer(func):
         result = func(*args, **kwargs)
         end = time.time()
         elapsed = end - start
-        print_custom('The total compute time is: {0:1.0f} s'.format(elapsed))
+        print('The total compute time is: {0:1.0f} s'.format(elapsed))
         return elapsed
     return inner
 
@@ -65,7 +65,7 @@ def compute_PQR_mod(images_part, block_num):
     pressure_hessian_part = np.zeros((node_count, time_int))
     
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'Processing iteration block number {block_num}')
+        print(f'Processing iteration block number {block_num}')
     
     # Compute velocity gradient invariants for each node
     for node_idx in range(node_count):
@@ -189,7 +189,7 @@ def compute_PQR_vectorized(images_part, block_num):
     strain = strain_diag + 0.5 * strain_offdiag
     pressure_hessian = enstrophy - strain
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'    Processing iteration block number {block_num+1}')
+        print(f'    Processing iteration block number {block_num+1}')
     return P_hat, Q_hat, R_hat, strain_rate, pressure_hessian, block_num
 
 
@@ -216,7 +216,7 @@ def compute_SQW_invariants(images_part, block_num):
     Q_W_part = np.zeros((node_count, time_int))
     
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'    Processing iteration block number {block_num+1}')
+        print(f'    Processing iteration block number {block_num+1}')
         
     # Compute invariants at each node
     for node_idx in range(node_count):
@@ -333,7 +333,7 @@ def compute_SQW_vectorized(images_part, block_num):
     #Qw_norm = Qw / var_Omega[:, None]     # normalized with var_Omega
 
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'    Processing iteration block number {block_num+1}')
+        print(f'    Processing iteration block number {block_num+1}')
     return Qs, Rs, Qw, var_A, var_S, var_Omega, strain_rate_mean, block_num
 
 def compute_PQR(images_part, block_num):
@@ -359,7 +359,7 @@ def compute_PQR(images_part, block_num):
     # The velocity, vortcity, strain rate, and pressure hessian vectors
     vort_part, vort_x_part, strain_rate_part, pressure_hessian_part= [np.zeros((node_count, time_int)) for _ in range(4)]
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print_custom(f'    Processing iteration block number {block_num+1}')
+        print(f'    Processing iteration block number {block_num+1}')
     # Compute the velocity gradient invariants at each node
     for node_idx in range(node_count):
         vel_grad = images_part[:, :, node_idx, :]
@@ -411,17 +411,17 @@ def compute_PQR(images_part, block_num):
 
 def extract_gradient(arr, cut, reload:bool=False, output:str=None, time:int=None):
     if os.path.exists(output+'/velocity_gradient_tensor_' + cut + '.h5') and not reload:
-        print_custom('---->VGT already extracted.')
-        print_custom(f'Reloading extracrted velocity gradient tensor from {output}/velocity_gradient_tensor_{cut}.h5')
+        print('---->VGT already extracted.')
+        print(f'Reloading extracrted velocity gradient tensor from {output}/velocity_gradient_tensor_{cut}.h5')
         with h5py.File(output+'/velocity_gradient_tensor_' + cut + '.h5', 'r') as f:
             velocity = f['velocity'][:]
             velocity_gradient = f['velocity_gradient'][:]
         if time is not None:
             velocity_gradient = velocity_gradient[:, :, :, :time]
             velocity = [v[:, :time] for v in velocity]
-            print_custom(f'---->Extracted velocity gradient tensor from h5 files with {time} time steps and {velocity_gradient.shape[2]} nodes.')
+            print(f'---->Extracted velocity gradient tensor from h5 files with {time} time steps and {velocity_gradient.shape[2]} nodes.')
     else:
-        print_custom('---->Extracting velocity gradient tensor from h5 files.\n')
+        print('---->Extracting velocity gradient tensor from h5 files.\n')
         r = Reader('hdf_antares')
         r['filename'] = arr[0]
         b = r.read()  # Base object of the Antares API
@@ -429,9 +429,9 @@ def extract_gradient(arr, cut, reload:bool=False, output:str=None, time:int=None
         gradients = [np.zeros((np.shape(b[0][0]['grad_u_x'])[0], len(arr)), dtype='float32') for _ in range(9)]
         for idx, file in enumerate(arr):
             if idx == 0 or idx == len(arr)-1:
-                print_custom(f'Extracting file {file}')
+                print(f'Extracting file {file}')
             elif idx % 100 == 0:
-                print_custom(f'Extracting file {os.path.basename(file)}')
+                print(f'Extracting file {os.path.basename(file)}')
             r['filename'] = file
             b = r.read()
             # Eextract ther velcoity vector
@@ -463,8 +463,8 @@ def save_output(node,node_indices,time,results,arr,output,velocity,cut):
         strain_rate_final[indices, :] = strain_rate
         pressure_hessian_final[indices, :] = pressure_hessian
     del results         # Free up memory
-    print_custom('\n---->Saving results...')
-    print_custom('Saving mean PQR')
+    print('\n---->Saving results...')
+    print('Saving mean PQR')
     # Saving the output mean PQR for visualization
     filename = os.path.join(output,'Velocity_Invarients_' + cut + '_Mean')
     r = Reader('hdf_antares')
@@ -485,9 +485,9 @@ def save_output(node,node_indices,time,results,arr,output,velocity,cut):
     w['base'] = b[:, :, ['x', 'y', 'z', 'P', 'Q', 'R', 'vort_x', 'strain_rate', 'u', 'v', 'w','Mean pressure_hessian','Variance pressure_hessian','density']]
     w['filename'] = filename
     w.dump()
-    print_custom('Mean PQR saved to {0:s}.'.format(filename))
+    print('Mean PQR saved to {0:s}.'.format(filename))
     
-    print_custom('Saving Full PQR')
+    print('Saving Full PQR')
     # Saving the full VGT result as h5 file
     output_file = os.path.join(output, 'Velocity_Invarients_' + cut + '.h5')
     with h5py.File(output_file, 'w') as f:
@@ -503,8 +503,8 @@ def save_output(node,node_indices,time,results,arr,output,velocity,cut):
         f.create_dataset('u', data=velocity[0], dtype='float32')
         f.create_dataset('v', data=velocity[1], dtype='float32')
         f.create_dataset('w', data=velocity[2], dtype='float32')
-    print_custom('Full PQR saved to {0:s}.'.format(output_file))
-    print_custom('\n---->File saving complete.')
+    print('Full PQR saved to {0:s}.'.format(output_file))
+    print('\n---->File saving complete.')
 
 
 def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
@@ -517,8 +517,8 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
         Qs[indices, :],Rs[indices, :], Qw[indices, :] = Q_S_part, R_S_part, Q_W_part
         var_A[indices], var_S[indices], var_Omega[indices], strain_rate_mean[indices] = var_A_part, var_S_part, var_Omega_part, strain_rate_mean_part
     del results         # Free up memory
-    print_custom('\n---->Saving results...')
-    print_custom('Saving mean Qs, Rs, Qw')
+    print('\n---->Saving results...')
+    print('Saving mean Qs, Rs, Qw')
     # Saving the output mean PQR for visualization
     filename = os.path.join(output,'Velocity_Invarients_Rotation_Strain_' + cut + '_Mean')
     r = Reader('hdf_antares')
@@ -538,9 +538,9 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     w['base'] = b[:, :, ['x', 'y', 'z', 'Qs', 'Rs', 'Qw', 'Variance Qs', 'Variance Rs', 'Variance Qw','Variance A','Variance S','Variance Omega','Mean strain_rate']]
     w['filename'] = filename
     w.dump()
-    print_custom('Mean Qs, Rs, Qw saved to {0:s}.'.format(filename))
+    print('Mean Qs, Rs, Qw saved to {0:s}.'.format(filename))
     
-    print_custom('Saving Full Qs, Rs, Qw')
+    print('Saving Full Qs, Rs, Qw')
     # Saving the full VGT result as h5 file
     output_file = os.path.join(output, 'Velocity_Invarients_' + cut + '.h5')
     with h5py.File(output_file, 'a') as f:
@@ -551,13 +551,13 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
         f.create_dataset('Variance S', data=var_S, dtype='float32')
         f.create_dataset('Variance Omega', data=var_Omega, dtype='float32')
         f.create_dataset('Mean strain_rate', data=strain_rate_mean, dtype='float32')
-    print_custom('Full Qs, Rs, Qw appended to {0:s}.'.format(output_file))
-    print_custom('\n---->File saving complete.')
+    print('Full Qs, Rs, Qw appended to {0:s}.'.format(output_file))
+    print('\n---->File saving complete.')
 
 @timer
 def main():
     text = 'Performing velocity gradient invariants computation.'
-    print_custom(f'\n{text:.^120}\n')  
+    print(f'\n{text:.^120}\n')  
     global velocity_gradient
     cut = argv[1]
     reload = False
@@ -580,33 +580,33 @@ def main():
     nb_tasks = 1000  # Number of tasks for splitting data
     node_indices = np.array_split(np.arange(node), nb_tasks)
     images_parts = [(velocity_gradient_np[:, :, indices, :], block_num) for block_num, indices in enumerate(node_indices)]
-    print_custom('\n---->Partitioning data into {0:d} blocks.'.format(len(node_indices)))
-    print_custom(f'Number of available parallel compute processes: {num_processes}')
-    print_custom(f'Number of nodes: {node}')
-    print_custom(f'Number of time steps: {time}')
-    print_custom('\n----> Perofrming Parallel VGT computations...')
+    print('\n---->Partitioning data into {0:d} blocks.'.format(len(node_indices)))
+    print(f'Number of available parallel compute processes: {num_processes}')
+    print(f'Number of nodes: {node}')
+    print(f'Number of time steps: {time}')
+    print('\n----> Perofrming Parallel VGT computations...')
     del velocity_gradient_np  # Free up memory
     
     # Parallel computation of the velocity gradient invariants
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(compute_PQR_vectorized, images_parts)
     #images_parts  # Free up memory
-    print_custom('\n---->Velocity gradient invariants computation complete.')
+    print('\n---->Velocity gradient invariants computation complete.')
     
     # Save the output
     save_output(node, node_indices, time, results, arr, output, velocity, cut)
     del results
     
-    print_custom('\n----> Perofrming Parallel Strain and Vorticity Tensor computations...')
+    print('\n----> Perofrming Parallel Strain and Vorticity Tensor computations...')
     # Parallel computation of the rate-of-strain and rate-of-rotation invariants
     with Pool(processes=num_processes) as pool:
         results = pool.starmap(compute_SQW_vectorized, images_parts)
     del images_parts
     save_output_strain(node, node_indices, time, results, arr, output, velocity, cut)
-    print_custom('\n---->Rate-of-strain and rate-of-rotation invariants computation complete.')
+    print('\n---->Rate-of-strain and rate-of-rotation invariants computation complete.')
     
     text = 'Velocity gradient invariants computation complete.'
-    print_custom(f'\n{text:.^120}\n')  
+    print(f'\n{text:.^120}\n')  
 
 if __name__ == '__main__':
     main()

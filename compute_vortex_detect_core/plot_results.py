@@ -7,7 +7,7 @@ import scipy.io
 from sklearn.decomposition import PCA
 from scipy.interpolate import griddata
 import matplotlib.colors as mcolors
-from .utils import print_custom
+from .utils import print
 
 def scale_points(core_loc, k):
     """
@@ -31,7 +31,7 @@ def scale_points(core_loc, k):
     Example:
         >>> points = np.array([[1, 2], [3, 4], [5, 6]])
         >>> scaled = scale_points(points, 0.5)  # Contract by 50%
-        >>> print_custom(f"Original centroid preserved: {np.mean(points, axis=0)} == {np.mean(scaled, axis=0)}")
+        >>> print(f"Original centroid preserved: {np.mean(points, axis=0)} == {np.mean(scaled, axis=0)}")
     """
     # Compute the geometric mean of x and y
     mean_x, mean_y = np.mean(core_loc, axis=0)
@@ -131,8 +131,8 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     Plots and saves the vortex core detection results using advanced visualization methods.
     Loads data from numpy files in the output directory.
     """
-    print_custom('----> Plotting vortex core figures')
-    print_custom(f'    Loading data from: {output_dir}')
+    print('----> Plotting vortex core figures')
+    print(f'    Loading data from: {output_dir}')
     
     # Load grid and vortex core data from files
     try:
@@ -164,7 +164,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
                 T_core_loc = np.load(os.path.join(output_dir, f'T_core_{cut_loc}.npy'))
                 T_core_diff = np.load(os.path.join(output_dir, f'T_core_{cut_loc}_Diff.npy'))
             except FileNotFoundError:
-                print_custom(f"Tertiary vortex data not found for {cut_loc}")
+                print(f"Tertiary vortex data not found for {cut_loc}")
                 tertiary = False
                 T_core_loc = np.array([])
                 T_core_diff = np.array([])
@@ -173,10 +173,10 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
             T_core_diff = np.array([])
             
     except FileNotFoundError as e:
-        print_custom(f"Error loading data files: {e}")
+        print(f"Error loading data files: {e}")
         return
     except Exception as e:
-        print_custom(f"Error loading data: {e}")
+        print(f"Error loading data: {e}")
         return
     
     # Set up plot parameters
@@ -322,8 +322,8 @@ def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.
     Plots and saves the probability distribution of vortex wandering.
     Loads data from numpy files in the output directory.
     """
-    print_custom('----> Plotting probability distribution')
-    print_custom(f'    Loading difference data from: {output_dir}')
+    print('----> Plotting probability distribution')
+    print(f'    Loading difference data from: {output_dir}')
     
     # Load vortex difference data from files
     try:
@@ -338,17 +338,17 @@ def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.
             try:
                 T_core_diff = np.load(os.path.join(output_dir, f'T_core_{cut_loc}_Diff.npy'))
             except FileNotFoundError:
-                print_custom(f"Tertiary vortex difference data not found for {cut_loc}")
+                print(f"Tertiary vortex difference data not found for {cut_loc}")
                 tertiary = False
                 T_core_diff = np.array([])
         else:
             T_core_diff = np.array([])
             
     except FileNotFoundError as e:
-        print_custom(f"Error loading difference data files: {e}")
+        print(f"Error loading difference data files: {e}")
         return
     except Exception as e:
-        print_custom(f"Error loading difference data: {e}")
+        print(f"Error loading difference data: {e}")
         return
     
     # Set up plot parameters
@@ -426,10 +426,10 @@ def plot_all_results(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     Creates all vortex detection plots and saves them.
     Loads all data from numpy files in the output directory.
     """
-    print_custom('----> Creating comprehensive vortex detection plots:')
-    print_custom(f'    Data directory: {output_dir}')
-    print_custom(f'    Cut location: {cut_loc}')
-    print_custom(f'    Data type: {data_type}')
+    print('----> Creating comprehensive vortex detection plots:')
+    print(f'    Data directory: {output_dir}')
+    print(f'    Cut location: {cut_loc}')
+    print(f'    Data type: {data_type}')
     
     # Create main vortex core plot
     plot_vortex_cores(cut_loc, output_dir, chord, data_type)
@@ -437,4 +437,4 @@ def plot_all_results(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     # Create probability distribution plot
     plot_probability_distribution(cut_loc, output_dir, data_type, chord)
     
-    print_custom('    All plots saved successfully')
+    print('    All plots saved successfully')

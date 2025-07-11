@@ -2,7 +2,7 @@ import numpy as np
 import os
 import h5py
 from antares import Reader
-from .utils import print_custom
+from .utils import print
 
 def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None, data_type:str='LES'):
     """
@@ -25,18 +25,18 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
     ('grad_v_x', 'node'), ('grad_v_y', 'node'), ('grad_v_z', 'node'),
     ('grad_w_x', 'node'), ('grad_w_y', 'node'), ('grad_w_z', 'node')]
 
-    print_custom(f'----> Extracting velocity gradient tensor from h5 files with {data_type} Data.')
+    print(f'----> Extracting velocity gradient tensor from h5 files with {data_type} Data.')
     otuput_file_name = 'velocity_gradient_tensor_' + cut + '_' + data_type + '.h5'
     if os.path.exists(os.path.join(output,otuput_file_name)) and not reload:
-        print_custom('----> VGT already extracted.')
-        print_custom(f'     Reloading extracrted velocity gradient tensor from {output}/velocity_gradient_tensor_{cut}.h5')
+        print('----> VGT already extracted.')
+        print(f'     Reloading extracrted velocity gradient tensor from {output}/velocity_gradient_tensor_{cut}.h5')
         with h5py.File(os.path.join(output,otuput_file_name), 'r') as f:
             velocity = f['velocity'][:]
             velocity_gradient = f['velocity_gradient'][:]
         if time is not None:
             velocity_gradient = velocity_gradient[:, :, :, :time]
             velocity = [v[:, :time] for v in velocity]
-            print_custom(f'---->Extracted velocity gradient tensor from h5 files with {time} time steps and {velocity_gradient.shape[2]} nodes.')
+            print(f'---->Extracted velocity gradient tensor from h5 files with {time} time steps and {velocity_gradient.shape[2]} nodes.')
     else:
         r = Reader('hdf_antares')
         r['filename'] = arr[0]
@@ -44,18 +44,18 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
         # Initialize the velocity and velocity gradient tensor
         velocity = [np.zeros((np.shape(b[0][0]['u'])[0], len(arr)), dtype='float32') for _ in range(5)]
         gradients = [np.zeros((np.shape(b[0][0]['grad_u_x'])[0], len(arr)), dtype='float32') for _ in range(9)]
-        print_custom("    The shape of the velocity vector is (nodes, time): ", velocity[0].shape)
-        print_custom("    The shape of the velocity gradient tensor is (nodes, time): ", gradients[0].shape)
+        print("    The shape of the velocity vector is (nodes, time): ", velocity[0].shape)
+        print("    The shape of the velocity gradient tensor is (nodes, time): ", gradients[0].shape)
         # Check the velocity gradient tensor components
         missing_keys = [key for key in VGT_keys if key not in b[0][0].keys()]
         if missing_keys:
             raise KeyError(f"The following required fields in the velocity gradient tensor are missing: {missing_keys}")
         else: 
-            print_custom('    All required fields in the velocity gradient tensor are present.')
-        print_custom(f'\nExtracting data files from driectory {os.path.dirname(arr[0])}...')
+            print('    All required fields in the velocity gradient tensor are present.')
+        print(f'\nExtracting data files from driectory {os.path.dirname(arr[0])}...')
         for idx, file in enumerate(arr):
             if idx % 100 == 0 or idx == 0 or idx == len(arr)-1:
-                print_custom(f'     Extracting file {idx}/{len(arr)}: {os.path.basename(file)}')
+                print(f'     Extracting file {idx}/{len(arr)}: {os.path.basename(file)}')
             r['filename'] = file
             b = r.read()
             # Extract ther velcoity vector

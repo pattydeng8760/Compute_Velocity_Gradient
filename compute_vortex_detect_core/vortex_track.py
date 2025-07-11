@@ -2,7 +2,7 @@
 import numpy as np
 from itertools import combinations
 from .make_grid import make_grid
-from .utils import print_custom
+from .utils import print
 
 # Define the vortex-related classes
 class vortex:
@@ -99,7 +99,7 @@ class vortex:
                 mask = (y >= np.min(y_lim)) & (y <= np.max(y_lim)) & (z >= np.min(z_lim)) & (z <= np.max(z_lim))
                 dummy = vort * mask
                 if np.all(dummy == 0):
-                    print_custom("All vortex values masked in 'max' choice.")
+                    print("All vortex values masked in 'max' choice.")
                     self.core_loc = [[np.nan, np.nan]]
                     self.core_mag = [np.nan]
                 else:
@@ -116,7 +116,7 @@ class vortex:
                 mask2 = mask0 & mask1
                 bounds, size_bounds, largest_area = find_squares(mask2)
                 if not largest_area:
-                    print_custom("No largest area found in 'precise' choice.")
+                    print("No largest area found in 'precise' choice.")
                     self.core_loc = [[np.nan, np.nan]]
                     self.core_mag = [np.nan]
                 else:
@@ -126,7 +126,7 @@ class vortex:
                     dummy = vars.grid_vort * mask
                     index = np.argwhere(dummy == np.min(dummy))
                     if index.size == 0:
-                        print_custom("No minimum found in 'precise' choice for vortex core.")
+                        print("No minimum found in 'precise' choice for vortex core.")
                         self.core_loc = [[np.nan, np.nan]]
                         self.core_mag = [np.nan]
                     else:
@@ -144,7 +144,7 @@ class vortex:
                 mask2 = mask0 & mask1
                 bounds, size_bounds, largest_area = find_squares(mask2)
                 if not largest_area:
-                    print_custom("No largest area found in 'area' choice.")
+                    print("No largest area found in 'area' choice.")
                     self.core_loc = [[np.nan, np.nan]]
                     self.core_mag = [np.nan]
                 else:
@@ -217,12 +217,12 @@ def find_squares(a):
         >>> import numpy as np
         >>> binary_array = np.array([[1, 1, 0], [1, 0, 0], [0, 0, 1]])
         >>> bounds, sizes, largest = find_squares(binary_array)
-        >>> print_custom(f"Found {len(bounds)} components with sizes {sizes}")
+        >>> print(f"Found {len(bounds)} components with sizes {sizes}")
     """
     # Find all positions with True/1 values
     ones = [(i, j) for i, row in enumerate(a) for j, val in enumerate(row) if val]
     if not ones:
-        print_custom("No connected squares found.")
+        print("No connected squares found.")
         return [], [], []
     
     # Build adjacency graph using 8-connectivity (including diagonals)
@@ -257,7 +257,7 @@ def find_squares(a):
                    for i in range(len(bounds))]
     
     if not size_bounds:
-        print_custom("No size bounds calculated.")
+        print("No size bounds calculated.")
         largest_area = []
     else:
         # Return the bounding box of the component with the largest area

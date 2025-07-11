@@ -20,7 +20,7 @@ Usage:
 """
 
 from .vortex_plot import VortexPlot, parse_arguments
-from .utils import init_logging_from_cut, timer
+from .utils import init_logging_from_cut, timer, print
 
 # Version and metadata
 __version__ = "1.0.0"
@@ -31,4 +31,4 @@ __linkedin__ = 'www.linkedin.com/in/patrick-gc-deng'
 __institution__ = "University of Toronto Institute for Aerospace Studies (UTIAS)"
 __description__ = "Vortex core plotting for QR analysis"
 
-__all__ = ["VortexPlot", "parse_arguments", "init_logging_from_cut", "timer"]
+__all__ = ["VortexPlot", "parse_arguments", "init_logging_from_cut", "timer", "print"]
