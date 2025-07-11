@@ -8,7 +8,7 @@ Main Components:
 - VelocityInvariant: Class to execute the full analysis workflow
 """
 
-from .utils import print, timer, setup_logging, init_logging_from_cut
+from .utils import print, timer, init_logging_from_cut
 from .extractor import extract_gradient
 from .invariants_pqr import compute_PQR_vectorized
 from .invariants_sqw import compute_SQW_vectorized
@@ -32,6 +32,5 @@ __all__ = [
     'save_output_strain',
     'print',
     'timer',
-    'setup_logging',
     'init_logging_from_cut'
 ]
