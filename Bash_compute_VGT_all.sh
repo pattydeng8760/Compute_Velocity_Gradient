@@ -6,7 +6,7 @@
 #SBATCH --mail-user=patrickgc.deng@mail.utoronto.ca
 #SBATCH --mail-type=ALL
 #SBATCH --account=rrg-plavoie
-source /home/p/plavoie/denggua1/.torch_envs/pdenv/bin/activate
+source /home/p/plavoie/denggua1/.virtualenvs/pdenv/bin/activate
 # Change this to wherever your “compute_velocity_gradient_core” package lives:
 export PYTHONPATH="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/PostProc/Vortex_Detect/Compute_Velocity_Gradient"
 
@@ -18,7 +18,7 @@ NPROC=16
 NBLOCKS=1200
 
 # List your cuts here:
-CUTS=("PIV1" "PIV2" "030_TE" "085_TE")
+CUTS=("PIV1" "PIV2" "PIV3" "030_TE" "085_TE" "095_TE")
 
 for CUT in "${CUTS[@]}"; do
   echo "Processing cut: $CUT"
