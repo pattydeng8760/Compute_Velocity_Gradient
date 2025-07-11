@@ -1,7 +1,7 @@
 import os, glob
 import numpy as np
 from multiprocessing import Pool, cpu_count
-from .utils import timer, print, init_logging_from_cut
+from .utils import timer, print_custom, init_logging_from_cut
 from .extractor import extract_gradient
 from .invariants_pqr import compute_PQR_vectorized
 from .invariants_sqw import compute_SQW_vectorized
@@ -111,30 +111,30 @@ class VelocityInvariant:
         nproc = min(avail, self.nproc)
         # split nodes into blocks
         node_indices = np.array_split(np.arange(node_count), self.nblocks)
-        print('\n---->Partitioning data into {0:d} blocks.'.format(len(node_indices)))
-        print(f'Number of available parallel compute processes: {nproc}')
-        print(f'Number of nodes: {node_count}')
-        print(f'Number of time steps: {time_steps}')
+        print_custom('\n---->Partitioning data into {0:d} blocks.'.format(len(node_indices)))
+        print_custom(f'Number of available parallel compute processes: {nproc}')
+        print_custom(f'Number of nodes: {node_count}')
+        print_custom(f'Number of time steps: {time_steps}')
         blocks = [(velocity_gradient[:, :, indices, :], block_num) for block_num, indices in enumerate(node_indices)]
         
         return velocity, node_count, node_indices, time_steps, blocks
 
     @timer
     def run(self):
-        print(f"\n{'Performing velocity gradient invariants computation.':=^100}\n")
+        print_custom(f"\n{'Performing velocity gradient invariants computation.':=^100}\n")
         
         # Print setup information
-        print('\n----> Input Parameters:')
-        print(f'    Cut: {self.cut}')
-        print(f'    Data type: {self.data_type}')
-        print(f'    Parent directory: {self.parent_dir}')
-        print(f'    Output directory: {self.output}')
-        print(f'    Number of processes: {self.nproc}')
-        print(f'    Number of blocks: {self.nblocks}')
-        print(f'    Reload: {self.reload}')
-        print(f'    Velocity: {self.velocity}')
-        print(f'    Angle of attack: {self.angle_of_attack}')
-        print(f'    Total files found: {len(self.arr)}')
+        print_custom('\n----> Input Parameters:')
+        print_custom(f'    Cut: {self.cut}')
+        print_custom(f'    Data type: {self.data_type}')
+        print_custom(f'    Parent directory: {self.parent_dir}')
+        print_custom(f'    Output directory: {self.output}')
+        print_custom(f'    Number of processes: {self.nproc}')
+        print_custom(f'    Number of blocks: {self.nblocks}')
+        print_custom(f'    Reload: {self.reload}')
+        print_custom(f'    Velocity: {self.velocity}')
+        print_custom(f'    Angle of attack: {self.angle_of_attack}')
+        print_custom(f'    Total files found: {len(self.arr)}')
         
         # 1) extract the velocity gradient tensor and velocity from the cut
         velocity_gradient, velocity = extract_gradient(
@@ -148,13 +148,13 @@ class VelocityInvariant:
         
         # 3) split nodes into blocks
         node_indices = np.array_split(np.arange(node_count), self.nblocks)
-        print('\n----> Partitioning data into {0:d} blocks.'.format(len(node_indices)))
-        print(f'    Number of available parallel compute processes: {nproc}')
-        print(f'    Number of nodes: {node_count}')
-        print(f'    Number of time steps: {time_steps}')
+        print_custom('\n----> Partitioning data into {0:d} blocks.'.format(len(node_indices)))
+        print_custom(f'    Number of available parallel compute processes: {nproc}')
+        print_custom(f'    Number of nodes: {node_count}')
+        print_custom(f'    Number of time steps: {time_steps}')
         blocks = [(velocity_gradient[:, :, indices, :], block_num) for block_num, indices in enumerate(node_indices)]
         del velocity_gradient  # free memory
-        print('\n----> Perofrming Parallel VGT Invariant Calculations...')
+        print_custom('\n----> Perofrming Parallel VGT Invariant Calculations...')
         
         # 4) compute PQR
         with Pool(nproc) as pool:
@@ -165,7 +165,7 @@ class VelocityInvariant:
         )
         del pqr_results
         
-        print('\n----> Perofrming Parallel Strain-Rotation Invariant Calculations...')
+        print_custom('\n----> Perofrming Parallel Strain-Rotation Invariant Calculations...')
         # 5) compute Qs, Rs, Qw
         with Pool(nproc) as pool:
             sqw_results = pool.starmap(compute_SQW_vectorized, blocks)
@@ -173,7 +173,7 @@ class VelocityInvariant:
             node_count, node_indices, time_steps,
             sqw_results, self.arr, self.output, velocity, self.cut
         )
-        print(f"\n{'Velocity gradient invariants computation complete.':=^100}\n")
+        print_custom(f"\n{'Velocity gradient invariants computation complete.':=^100}\n")
 
 def main(args=None):
     # Parse CLI args

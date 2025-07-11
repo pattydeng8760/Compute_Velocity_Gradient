@@ -8,7 +8,7 @@ from window_bounds import get_window_boundaries
 from .make_grid import make_grid
 from .vortex_track import vortex, vortex_trace
 from .save_data import save_data
-from .utils import print
+from .utils import print_custom
 
 def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_WindowUR, TV_WindowLL, TV_WindowUR, cut_loc, block_num):
     """
@@ -54,10 +54,10 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
     total_files_in_block = len(file_block)
     
     # Print files being assessed for this block
-    print(f"    Block {block_num}: Processing {total_files_in_block} files")
+    print_custom(f"    Block {block_num}: Processing {total_files_in_block} files")
     for file_idx, file_path in enumerate(file_block):
         file_name = os.path.basename(file_path)
-        print(f"        File {file_idx + 1}/{total_files_in_block}: {file_name}")
+        print_custom(f"        File {file_idx + 1}/{total_files_in_block}: {file_name}")
         
         try:
             
@@ -79,7 +79,7 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
             else:
                 # Optionally, verify that 'y' and 'z' are consistent
                 if not (np.array_equal(y, y_file) and np.array_equal(z, z_file)):
-                    print(f"Block {block_num}: 'y' and 'z' differ in file {file_path}. Using the first file's 'y' and 'z'.")
+                    print_custom(f"Block {block_num}: 'y' and 'z' differ in file {file_path}. Using the first file's 'y' and 'z'.")
             
             # Initialize vortex objects
             S_Vortex = vortex('Secondary', SV_WindowLL, SV_WindowUR, y, z, u, vort_x, 'area', -18)
@@ -103,11 +103,11 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
                 T_core_loc_block.append(T_Vortex.core.core_loc[0])
             
         except Exception as e:
-            print(f"Block {block_num}: Error processing file {file_path}: {e}")
+            print_custom(f"Block {block_num}: Error processing file {file_path}: {e}")
             continue  # Skip to the next file
     
     # Final progress report for the block
-    print(f"    Block {block_num}: Completed processing {total_files_in_block} files")
+    print_custom(f"    Block {block_num}: Completed processing {total_files_in_block} files")
     
     # Convert lists to numpy arrays
     aggregated_u = np.array(aggregated_u)
@@ -176,7 +176,7 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
     Example:
         >>> results = detect_vortex('/path/to/data', 'PIV1', 10, method='precise', nb_tasks=8)
         >>> S_loc, S_diff, P_loc, P_diff, T_loc, T_diff, grid = results
-        >>> print(f"Detected {len(S_loc)} timesteps of secondary vortex data")
+        >>> print_custom(f"Detected {len(S_loc)} timesteps of secondary vortex data")
     
     Note:
         - Window boundaries are loaded from the window_bounds module
@@ -184,15 +184,15 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
         - Tertiary vortex detection depends on the cut location
         - Results are automatically saved to numpy and MATLAB files
     """
-    print('\n----> Data Source Information:')
-    print(f'    Source directory: {source_dir}')
-    print(f'    Cut location: {cut}')
+    print_custom('\n----> Data Source Information:')
+    print_custom(f'    Source directory: {source_dir}')
+    print_custom(f'    Cut location: {cut}')
     
     # Get window boundaries for the given cut location
     try:
         window_boundaries = get_window_boundaries(cut, str(alpha))
     except ValueError as e:
-        print(str(e))
+        print_custom(str(e))
         raise
     
     SV_WindowLL = window_boundaries['SV_WindowLL']
@@ -208,10 +208,10 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
         source_files = source_files[:max_file]
     
     total_files = len(source_files)
-    print(f'    Total number of files to process: {total_files}')
+    print_custom(f'    Total number of files to process: {total_files}')
 
     if total_files == 0:
-        print("No .h5 files found in the source directory.")
+        print_custom("No .h5 files found in the source directory.")
         raise FileNotFoundError("No .h5 files found in the source directory.")
 
     # Determine the number of parallel tasks
@@ -222,26 +222,26 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
     if nproc > total_files:
         nproc = total_files
     
-    print('\n----> Parallel Processing Configuration:')
-    print(f'    Number of available parallel compute processes: {nproc}')
-    print(f'    Number of parallel tasks (blocks): {nproc}')
+    print_custom('\n----> Parallel Processing Configuration:')
+    print_custom(f'    Number of available parallel compute processes: {nproc}')
+    print_custom(f'    Number of parallel tasks (blocks): {nproc}')
 
     # Split the data_files into nproc roughly equal blocks
     file_blocks = np.array_split(source_files, nproc)
-    print(f'    Data files split into {nproc} blocks.')
+    print_custom(f'    Data files split into {nproc} blocks.')
     
     # Create blocks with additional parameters for starmap
     blocks = [(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_WindowUR, TV_WindowLL, TV_WindowUR, cut, block_num) 
               for block_num, file_block in enumerate(file_blocks)]
 
-    print('\n----> Performing Parallel Vortex Detection...')
+    print_custom('\n----> Performing Parallel Vortex Detection...')
     
     # Process blocks in parallel
     with Pool(nproc) as pool:
         results = pool.starmap(process_file_block, blocks)
     
-    print('\n----> File Processing Results:')
-    print('    File processing complete.')
+    print_custom('\n----> File Processing Results:')
+    print_custom('    File processing complete.')
     
     # Initialize lists to collect results
     aggregated_u, aggregated_v, aggregated_w, aggregated_vort = [], [], [], []
@@ -256,7 +256,7 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
                 z_master = result['z']
             else:
                 if not (np.array_equal(y_master, result['y']) and np.array_equal(z_master, result['z'])):
-                    print("Inconsistent 'y' and 'z' across files. Using the first file's 'y' and 'z'.")
+                    print_custom("Inconsistent 'y' and 'z' across files. Using the first file's 'y' and 'z'.")
         
         aggregated_u.append(result['u'])
         aggregated_v.append(result['v'])
@@ -284,7 +284,7 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
 
     # Check if 'y_master' and 'z_master' are defined
     if y_master is None or z_master is None:
-        print("No 'y' and 'z' data collected from any files.")
+        print_custom("No 'y' and 'z' data collected from any files.")
         raise ValueError("No 'y' and 'z' data collected from any files.")
     
     # The average vortex core locations
@@ -312,8 +312,8 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
         T_Vortex, T_Vort_Diff = [], [] 
     
     # Saving data
-    print('\n----> Saving Results:')
-    print(f'    Saving processed data to: {output_dir}')
+    print_custom('\n----> Saving Results:')
+    print_custom(f'    Saving processed data to: {output_dir}')
     save_data(Vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, output_dir, tertiary)
-    print('    Data saved successfully')
+    print_custom('    Data saved successfully')
     return S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars

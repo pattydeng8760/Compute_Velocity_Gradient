@@ -4,7 +4,7 @@ import multiprocessing
 import time
 import argparse
 from multiprocessing import Pool, cpu_count
-from .utils import timer, print, init_logging_from_cut
+from .utils import timer, print_custom, init_logging_from_cut
 from .detect_vortex import detect_vortex
 from .plot_results import plot_all_results
 
@@ -117,33 +117,33 @@ class VortexDetect:
         """Run the complete vortex detection pipeline."""
         t = time.time()
         
-        print(f"\n{'Performing vortex detection analysis.':=^100}\n")
+        print_custom(f"\n{'Performing vortex detection analysis.':=^100}\n")
         
         # Print setup information
-        print('\n----> Input Parameters:')
-        print(f'    Data type: {self.data_type}')
-        print(f'    Cut: {self.cut}')
-        print(f'    Parent directory: {self.parent_dir}')
-        print(f'    Source directory: {self.source_dir}')
-        print(f'    Output directory: {self.sol_dir}')
-        print(f'    Number of processes: {self.nproc}')
-        print(f'    Detection method: {self.method}')
-        print(f'    Max files (testing): {self.max_file if self.max_file else "None"}')
-        print(f'    Angle of attack: {self.alpha}')
-        print(f'    Chord length: {self.chord}')
-        print(f'    Generate plots: {self.plot}')
-        print(f'    Plot only mode: {self.plot_only}')
+        print_custom('\n----> Input Parameters:')
+        print_custom(f'    Data type: {self.data_type}')
+        print_custom(f'    Cut: {self.cut}')
+        print_custom(f'    Parent directory: {self.parent_dir}')
+        print_custom(f'    Source directory: {self.source_dir}')
+        print_custom(f'    Output directory: {self.sol_dir}')
+        print_custom(f'    Number of processes: {self.nproc}')
+        print_custom(f'    Detection method: {self.method}')
+        print_custom(f'    Max files (testing): {self.max_file if self.max_file else "None"}')
+        print_custom(f'    Angle of attack: {self.alpha}')
+        print_custom(f'    Chord length: {self.chord}')
+        print_custom(f'    Generate plots: {self.plot}')
+        print_custom(f'    Plot only mode: {self.plot_only}')
         
         # Check if plot-only mode is requested
         if self.plot_only:
-            print('\n----> Plot-only mode: Checking for existing data files...')
+            print_custom('\n----> Plot-only mode: Checking for existing data files...')
             if self.check_required_files():
-                print('    All required files found. Generating plots only.')
+                print_custom('    All required files found. Generating plots only.')
                 plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
                 S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars = None, None, None, None, None, None, None
             else:
-                print('    Error: Required data files not found. Cannot generate plots.')
-                print('    Please run vortex detection first without --plot-only flag.')
+                print_custom('    Error: Required data files not found. Cannot generate plots.')
+                print_custom('    Please run vortex detection first without --plot-only flag.')
                 return None
         else:
             # Detect vortices
@@ -162,9 +162,9 @@ class VortexDetect:
                 plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
         
         elapsed = time.time() - t
-        print(f"\n{'Vortex detection analysis complete.':=^100}\n")
-        print('\n----> Timing Information:')
-        print(f'    Total calculation time: {elapsed:1.0f} s')
+        print_custom(f"\n{'Vortex detection analysis complete.':=^100}\n")
+        print_custom('\n----> Timing Information:')
+        print_custom(f'    Total calculation time: {elapsed:1.0f} s')
         
         return S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars
     
@@ -175,7 +175,7 @@ class VortexDetect:
         Returns:
             bool: True if all required files exist, False otherwise
         """
-        print('    Checking for required data files:')
+        print_custom('    Checking for required data files:')
         
         # List of required files
         required_files = [
@@ -202,23 +202,23 @@ class VortexDetect:
                 tf_path = os.path.join(self.sol_dir, tf)
                 if os.path.exists(tf_path):
                     required_files.append(tf)
-                    print(f'        Found optional tertiary file: {tf}')
+                    print_custom(f'        Found optional tertiary file: {tf}')
         
         # Check each required file
         missing_files = []
         for filename in required_files:
             filepath = os.path.join(self.sol_dir, filename)
             if os.path.exists(filepath):
-                print(f'        ✓ Found: {filename}')
+                print_custom(f'        ✓ Found: {filename}')
             else:
-                print(f'        ✗ Missing: {filename}')
+                print_custom(f'        ✗ Missing: {filename}')
                 missing_files.append(filename)
         
         if missing_files:
-            print(f'    Missing {len(missing_files)} required file(s)')
+            print_custom(f'    Missing {len(missing_files)} required file(s)')
             return False
         else:
-            print(f'    All {len(required_files)} required files found')
+            print_custom(f'    All {len(required_files)} required files found')
             return True
     
     def plot_results(self):
@@ -228,14 +228,14 @@ class VortexDetect:
         This method is a convenience function that can be called directly
         to generate plots without running the full detection pipeline.
         """
-        print('\n----> Generating plots from existing data...')
+        print_custom('\n----> Generating plots from existing data...')
         
         if self.check_required_files():
             plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
-            print('    Plot generation completed successfully')
+            print_custom('    Plot generation completed successfully')
         else:
-            print('    Error: Cannot generate plots - required files missing')
-            print('    Please run vortex detection first to generate the required data files')
+            print_custom('    Error: Cannot generate plots - required files missing')
+            print_custom('    Please run vortex detection first to generate the required data files')
 
 def main(args=None):
     """Main function for handling vortex detection in parallel."""

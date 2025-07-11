@@ -1,5 +1,5 @@
 import numpy as np
-from .utils import print
+from .utils import print_custom
 
 def compute_PQR_vectorized(images_part, block_num):
     """
@@ -86,7 +86,7 @@ def compute_PQR_vectorized(images_part, block_num):
     strain = strain_diag + 0.5 * strain_offdiag
     pressure_hessian = enstrophy - strain
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print(f'    Processing iteration block number {block_num+1}')
+        print_custom(f'    Processing iteration block number {block_num+1}')
     return P_hat, Q_hat, R_hat, strain_rate, pressure_hessian, block_num
 
 
@@ -118,7 +118,7 @@ def compute_PQR_mod(images_part, block_num):
     pressure_hessian_part = np.zeros((node_count, time_int))
     
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print(f'Processing iteration block number {block_num}')
+        print_custom(f'Processing iteration block number {block_num}')
     
     # Compute velocity gradient invariants for each node
     for node_idx in range(node_count):
@@ -182,7 +182,7 @@ def compute_PQR(images_part, block_num):
     # The velocity, vortcity, strain rate, and pressure hessian vectors
     vort_part, vort_x_part, strain_rate_part, pressure_hessian_part= [np.zeros((node_count, time_int)) for _ in range(4)]
     if np.mod(block_num+1, 100) == 0 or block_num == 0:
-        print(f'    Processing iteration block number {block_num+1}')
+        print_custom(f'    Processing iteration block number {block_num+1}')
     # Compute the velocity gradient invariants at each node
     for node_idx in range(node_count):
         vel_grad = images_part[:, :, node_idx, :]

@@ -1,4 +1,4 @@
-from .utils import print
+from .utils import print_custom
 import os
 import h5py
 import numpy as np
@@ -17,8 +17,8 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
         strain_rate_final[indices, :] = strain_rate
         pressure_hessian_final[indices, :] = pressure_hessian
     del results         # Free up memory
-    print('\n----> Saving results...')
-    #print('Saving mean PQR')
+    print_custom('\n----> Saving results...')
+    #print_custom('Saving mean PQR')
     # Saving the output mean PQR for visualization
     filename = os.path.join(output,'Velocity_Invariants_' + cut + '_Mean')
     r = Reader('hdf_antares')
@@ -39,9 +39,9 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
     w['base'] = b[:, :, ['x', 'y', 'z', 'P', 'Q', 'R', 'vort_x', 'strain_rate', 'u', 'v', 'w','Mean pressure_hessian','Variance pressure_hessian','density']]
     w['filename'] = filename
     w.dump()
-    print('    Mean PQR saved to {0:s}.'.format(filename))
+    print_custom('    Mean PQR saved to {0:s}.'.format(filename))
     
-    #print('Saving Full PQR')
+    #print_custom('Saving Full PQR')
     # Saving the full VGT result as h5 file
     output_file = os.path.join(output, 'Velocity_Invariants_' + cut + '.h5')
     with h5py.File(output_file, 'w') as f:
@@ -57,8 +57,8 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
         f.create_dataset('u', data=velocity[0], dtype='float32')
         f.create_dataset('v', data=velocity[1], dtype='float32')
         f.create_dataset('w', data=velocity[2], dtype='float32')
-    print('    Full PQR saved to {0:s}.'.format(output_file))
-    #print('\n---->File saving complete.')
+    print_custom('    Full PQR saved to {0:s}.'.format(output_file))
+    #print_custom('\n---->File saving complete.')
 
 def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     # Initialize arrays for final results
@@ -73,8 +73,8 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
         strain_rate_mean[indices], rotation_rate_mean[indices] = strain_rate_mean_part, rotation_rate_mean_part
         strain_rate_fluc_rms[indices], rotation_rate_fluc_rms[indices] = strain_rate_rms_part, rotation_rate_rms_part
     del results         # Free up memory
-    print('\n---->Saving results...')
-    #print('Saving mean Qs, Rs, Qw')
+    print_custom('\n---->Saving results...')
+    #print_custom('Saving mean Qs, Rs, Qw')
     # Saving the output mean PQR for visualization
     filename = os.path.join(output,'Velocity_Invariants_Rotation_Strain_' + cut + '_Mean')
     r = Reader('hdf_antares')
@@ -97,9 +97,9 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     w['base'] = b[:, :, ['x', 'y', 'z', 'Qs', 'Rs', 'Qw', 'Variance Qs', 'Variance Rs', 'Variance Qw','Variance A','Variance S','Variance Omega','Mean strain_rate']]
     w['filename'] = filename
     w.dump()
-    print('    Mean Qs, Rs, Qw saved to {0:s}.'.format(filename))
+    print_custom('    Mean Qs, Rs, Qw saved to {0:s}.'.format(filename))
     
-    #print('Saving Full Qs, Rs, Qw')
+    #print_custom('Saving Full Qs, Rs, Qw')
     # Saving the full VGT result as h5 file
     output_file = os.path.join(output, 'Velocity_Invariants_' + cut + '.h5')
     with h5py.File(output_file, 'a') as f:
@@ -113,5 +113,5 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
         f.create_dataset('Mean rotation_rate', data=rotation_rate_mean, dtype='float32')
         f.create_dataset('Mean strain_rate_fluc_rms', data=strain_rate_fluc_rms, dtype='float32')
         f.create_dataset('Mean rotation_rate_fluc_rms', data=rotation_rate_fluc_rms, dtype='float32')
-    print('    Full Qs, Rs, Qw appended to {0:s}.'.format(output_file))
-    #print('\n---->File saving complete.')
+    print_custom('    Full Qs, Rs, Qw appended to {0:s}.'.format(output_file))
+    #print_custom('\n---->File saving complete.')

@@ -4,7 +4,7 @@ import time
 import logging
 from functools import wraps
 
-def print(*args, **kwargs):
+def print_custom(*args, **kwargs):
     """Custom print function that also logs to file."""
     # If logging is configured, use logging (which handles both file and console)
     if logging.getLogger().hasHandlers():
@@ -31,12 +31,12 @@ def init_logging_from_cut(cut, data_type='LES'):
         ]
     )
     
-    print(f"Logging initialized. Output will be saved to: {log_filename}")
+    print_custom(f"Logging initialized. Output will be saved to: {log_filename}")
 
 def timer(func):
     def inner(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
-        print(f"The total compute time is: {int(time.time() - start)} s")
+        print_custom(f"The total compute time is: {int(time.time() - start)} s")
         return result
     return inner
