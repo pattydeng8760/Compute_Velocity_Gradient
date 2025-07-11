@@ -310,12 +310,12 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
                 bbox_inches='tight', pad_inches=0.2)
     plt.close()
     
-    # Extract PCA line data and save to HDF5
-    filename = os.path.join(output_dir, f'Velocity_Core_B_10AOA_{data_type}_U30.h5')
-    extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
-    extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
-    if tertiary and len(T_core_loc) > 0:
-        extract_pca_line(T_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'TV')
+    # Extract PCA line data and save to HDF5 (commented out - obsolete)
+    # filename = os.path.join(output_dir, f'Velocity_Core_B_10AOA_{data_type}_U30.h5')
+    # extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
+    # extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
+    # if tertiary and len(T_core_loc) > 0:
+    #     extract_pca_line(T_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'TV')
 
 def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.3048):
     """

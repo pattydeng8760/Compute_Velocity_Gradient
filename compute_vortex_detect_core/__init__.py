@@ -45,8 +45,11 @@ from .utils import print, init_logging_from_cut, timer
 
 # Version and metadata
 __version__ = "1.0.0"
-__author__ = "Patrick Deng"
+__author__ = "Patrick Guang Chen Deng"
 __email__ = "patrickgc.deng@mail.utoronto.ca"
+__github__ = 'https://github.com/pattydeng8760'
+__linkedin__ = 'www.linkedin.com/in/patrick-gc-deng'
+__institution__ = "University of Toronto Institute for Aerospace Studies (UTIAS)"
 __description__ = "Vortex core detection and tracking for CFD/PIV data"
 
 # Public API

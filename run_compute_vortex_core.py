@@ -10,15 +10,16 @@ from compute_vortex_detect_core.utils import init_logging_from_cut
 
 config = {
     "data_type"      : "LES",
-    "cut"            : "PIV1",
+    "cut"            : "095_TE",
     "parent_dir"     : "/Volumes/LES Data/B_10AOA_LES/PostProc",
     "output_dir"     : ".",
     "nproc"          : 16,
     "method"         : "precise",
-    "max_file"       : 16,
+    "max_file"       : None,
     "angle_of_attack": 10,
     "plot"           : True,
-    "chord"          : 0.3048
+    "chord"          : 0.3048,
+    "plot_only"      : True  # Set to True to only generate plots from existing data
 }
 
 if __name__ == "__main__":
