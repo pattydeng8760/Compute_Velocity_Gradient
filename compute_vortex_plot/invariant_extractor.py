@@ -95,7 +95,10 @@ def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_li
     stacked_list = []
     
     for core, adj_set in zip(core_indices, adjacent_points_list):
-        cell_indices = [core] + sorted(list(adj_set))
+        # Ensure all indices are integers
+        core_int = int(core)
+        adj_set_int = [int(idx) for idx in adj_set if isinstance(idx, (int, float, np.integer))]
+        cell_indices = [core_int] + sorted(adj_set_int)
         data = variable_all[cell_indices, :]
         stacked = data.reshape(-1)
         stacked_list.append(stacked)
@@ -123,7 +126,10 @@ def extract_mean_variable(variable_all, core_indices, adjacent_points_list):
     averaged_list = []
     
     for core, adj_set in zip(core_indices, adjacent_points_list):
-        cell_indices = [core] + sorted(list(adj_set))
+        # Ensure all indices are integers
+        core_int = int(core)
+        adj_set_int = [int(idx) for idx in adj_set if isinstance(idx, (int, float, np.integer))]
+        cell_indices = [core_int] + sorted(adj_set_int)
         data = variable_all[cell_indices]
         avg_value = np.mean(data)
         averaged_list.append(avg_value)
@@ -202,6 +208,6 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     plot_local_invariants_Qs_Qw(location, Qw, Qs, Vortex_Type, data_type)
     
     # Save extracted data
-    save_extracted_data(location, Phat, Qhat, Rhat, Qs, Qw, Rs, Vortex_Type)
+    save_extracted_data(location, Phat, Qhat, Rhat, Qs, Qw, Rs, Vortex_Type, data_type)
     
     return loc_points

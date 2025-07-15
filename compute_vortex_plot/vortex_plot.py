@@ -5,7 +5,7 @@ import argparse
 from .utils import timer, print, init_logging_from_cut
 from .data_loader import load_velocity_invariants, load_connectivity
 from .grid_maker import make_grid
-from .vortex_detector import vortex
+from .vortex_detector import vortex, piv_vortex
 from .invariant_extractor import extract_velocity_invariants
 from .plotter import plot_global_invariants, plot_vortex_profiles
 from .data_saver import save_extracted_data
@@ -116,6 +116,64 @@ class VortexPlot:
     
     def create_grid(self):
         print('\n----> Creating interpolation grid...')
+        
+        if self.data_type == 'PIV':
+            # PIV data is already structured - no interpolation needed
+            print('    PIV data detected - using structured grid directly')
+            self.data_grid = self._create_piv_structured_grid()
+        else:
+            # LES data requires interpolation
+            print('    LES data detected - performing interpolation')
+            self.data_grid = self._create_les_interpolated_grid()
+        
+        print('    Grid creation complete.')
+    
+    def _create_piv_structured_grid(self):
+        """Create PIV grid object directly from structured data without interpolation."""
+        from .grid_maker import PIVStructuredGrid
+        
+        # PIV data structure analysis
+        unique_y = np.unique(self.data['y'])
+        unique_z = np.unique(self.data['z'])
+        ny, nz = len(unique_y), len(unique_z)
+        
+        print(f'    PIV structured grid dimensions: {ny} x {nz}')
+        print(f'    Y range: {unique_y.min():.6f} to {unique_y.max():.6f}')
+        print(f'    Z range: {unique_z.min():.6f} to {unique_z.max():.6f}')
+        
+        # Create structured grid object
+        data_grid = PIVStructuredGrid(
+            self.data['y'], self.data['z'], 
+            unique_y, unique_z,
+            ny, nz
+        )
+        
+        # Add mean variables directly without interpolation
+        variables = [
+            ('vort_x', np.mean(self.data['vort_x'], axis=1)),
+            ('Phat', np.mean(self.data['Phat_all'], axis=1)),
+            ('Qhat', np.mean(self.data['Qhat_all'], axis=1)),
+            ('Rhat', np.mean(self.data['Rhat_all'], axis=1)),
+            ('Pressure_Hessian', np.mean(self.data['pressure_hessian'], axis=1)),
+            ('Qs', np.mean(self.data['Qs_all'], axis=1)),
+            ('Rs', np.mean(self.data['Rs_all'], axis=1)),
+            ('Qw', np.mean(self.data['Qw_all'], axis=1)),
+            ('var_A', self.data['var_A']),
+            ('var_S', self.data['var_S']),
+            ('var_omega', self.data['var_omega']),
+            ('mean_SR', self.data['mean_SR'])
+        ]
+        
+        for var_name, var_data in variables:
+            data_grid.add_variable(var_name, var_data)
+        
+        return data_grid
+    
+    def _create_les_interpolated_grid(self):
+        """Create LES grid object with interpolation."""
+        from .grid_maker import make_grid
+        
+        # LES data bounds
         y_bnd = [-0.05, 0.05]
         z_bnd = [-0.16, -0.06]
         
@@ -124,7 +182,7 @@ class VortexPlot:
         print(f'    Z bounds: {z_bnd}')
         
         # Create grid for plotting global invariants
-        self.data_grid = make_grid(
+        data_grid = make_grid(
             self.grid_size, y_bnd, z_bnd, 
             self.data['y'], self.data['z'], 
             np.mean(self.data['u'], axis=1),
@@ -148,37 +206,67 @@ class VortexPlot:
         ]
         
         for var_name, var_data in variables:
-            self.data_grid.calculate_grid(self.grid_size, y_bnd, z_bnd, var_data, var_name)
+            data_grid.calculate_grid(self.grid_size, y_bnd, z_bnd, var_data, var_name)
         
-        print('    Grid creation complete.')
+        return data_grid
     
     def detect_vortices(self):
         print('\n----> Detecting vortices...')
         
-        # Get window boundaries
-        boundaries = get_window_boundaries(self.location, str(self.angle_of_attack))
-        print(f'    Window boundaries loaded for location: {self.location}')
+        # Get window boundaries based on data type
+        if self.data_type == 'PIV':
+            from window_bounds import get_window_boundaries_PIV
+            boundaries_dict = get_window_boundaries_PIV()
+            boundaries = boundaries_dict[str(self.angle_of_attack)][self.location]
+            print(f'    PIV window boundaries loaded for location: {self.location}')
+        else:
+            boundaries = get_window_boundaries(self.location, str(self.angle_of_attack))
+            print(f'    LES window boundaries loaded for location: {self.location}')
         
         mean_vort_x = np.mean(self.data['vort_x'], axis=1)
         mean_u = np.mean(self.data['u'], axis=1)
         
+        # Adjust detection parameters for PIV data
+        if self.data_type == 'PIV':
+            # PIV data typically has different vorticity levels and velocity thresholds
+            primary_level = -5  # Much less strict for PIV data
+            secondary_level = -5
+            tertiary_level = -2
+            shear_level = -0.1  # Extremely relaxed for PIV shear vortices (based on debug data)
+            primary_method = 'max'  # Max method works better for PIV
+            secondary_method = 'max'
+        else:
+            # LES data parameters
+            primary_level = -35
+            secondary_level = -35
+            tertiary_level = -30
+            shear_level = -15
+            primary_method = 'precise'
+            secondary_method = 'precise'
+        
+        # Choose vortex detector based on data type
+        if self.data_type == 'PIV':
+            vortex_detector = piv_vortex
+        else:
+            vortex_detector = vortex
+        
         # Primary vortex
         print('    Detecting primary vortex...')
-        self.P_Vortex = vortex(
+        self.P_Vortex = vortex_detector(
             'Primary', boundaries['PV_WindowLL'], boundaries['PV_WindowUR'],
             self.data['y'], self.data['z'], mean_u, 
             mean_vort_x * self.chord / self.velocity, 
-            choice='precise', level=-35
+            choice=primary_method, level=primary_level
         )
         print(f'        Primary vortex core: {self.P_Vortex.core.core_loc[0]}')
         
         # Secondary vortex
         print('    Detecting secondary vortex...')
-        self.S_Vortex = vortex(
+        self.S_Vortex = vortex_detector(
             'Secondary', boundaries['SV_WindowLL'], boundaries['SV_WindowUR'],
             self.data['y'], self.data['z'], mean_u, 
             mean_vort_x * self.chord / self.velocity, 
-            choice='precise', level=-35
+            choice=secondary_method, level=secondary_level
         )
         print(f'        Secondary vortex core: {self.S_Vortex.core.core_loc[0]}')
         
@@ -191,11 +279,11 @@ class VortexPlot:
         TV_WindowUR = boundaries.get('TV_WindowUR')
         if TV_WindowLL is not None and TV_WindowUR is not None and len(TV_WindowLL) == 2 and len(TV_WindowUR) == 2:
             print('    Detecting tertiary vortex...')
-            self.T_Vortex = vortex(
+            self.T_Vortex = vortex_detector(
                 'Tertiary', TV_WindowLL, TV_WindowUR,
                 self.data['y'], self.data['z'], mean_u, 
                 mean_vort_x * self.chord / self.velocity, 
-                choice='area', level=-30
+                choice='area', level=tertiary_level
             )
             self.loc_points_aux.append(self.T_Vortex)
             aux_vortex_count += 1
@@ -206,25 +294,25 @@ class VortexPlot:
         SS_shear_windowUR = boundaries.get('SS_shear_windowUR')
         if SS_shear_windowLL is not None and SS_shear_windowUR is not None and len(SS_shear_windowLL) == 2 and len(SS_shear_windowUR) == 2:
             print('    Detecting secondary shear vortex...')
-            self.SS_shear = vortex(
+            self.SS_shear = vortex_detector(
                 'SS_shear', SS_shear_windowLL, SS_shear_windowUR,
                 self.data['y'], self.data['z'], mean_u, 
                 mean_vort_x * self.chord / self.velocity, 
-                choice='area', level=-15
+                choice='area', level=shear_level
             )
             self.loc_points_aux.append(self.SS_shear)
             aux_vortex_count += 1
             print(f'        Secondary shear vortex core: {self.SS_shear.core.core_loc[0]}')
         
         PS_shear_windowLL = boundaries.get('PS_shear_windowLL')
-        PS_shear_windowUR = boundaries.get('PS_shear_windowLL')  # Note: original code has typo
+        PS_shear_windowUR = boundaries.get('PS_shear_windowUR')  # Fixed typo
         if PS_shear_windowLL is not None and PS_shear_windowUR is not None and len(PS_shear_windowLL) == 2 and len(PS_shear_windowUR) == 2:
             print('    Detecting primary shear vortex...')
-            self.PS_shear = vortex(
+            self.PS_shear = vortex_detector(
                 'PS_shear', PS_shear_windowLL, PS_shear_windowUR,
                 self.data['y'], self.data['z'], mean_u, 
                 mean_vort_x * self.chord / self.velocity, 
-                choice='area', level=-15
+                choice='area', level=shear_level
             )
             self.loc_points_aux.append(self.PS_shear)
             aux_vortex_count += 1
@@ -273,11 +361,13 @@ class VortexPlot:
         
         if hasattr(self, 'SS_shear'):
             print('    Extracting secondary shear vortex invariants...')
-            print('        Radius: 0.0005, Layers: 2, Angle range: -90-90°')
+            # Use larger radius for PIV shear vortices
+            shear_radius = 0.003 if self.data_type == 'PIV' else 0.0005
+            print(f'        Radius: {shear_radius}, Layers: 2, Angle range: -90-90°')
             loc_points_SS = extract_velocity_invariants(
                 self.data, self.connectivity, self.SS_shear, 
                 location=self.location, Vortex_Type="SS_shear",
-                radius=0.0005, n_layers=2, start_angle=-90, end_angle=90,
+                radius=shear_radius, n_layers=2, start_angle=-90, end_angle=90,
                 data_type=self.data_type
             )
             self.loc_points_aux_coords.append(loc_points_SS[:, 0])
@@ -285,11 +375,13 @@ class VortexPlot:
         
         if hasattr(self, 'PS_shear'):
             print('    Extracting primary shear vortex invariants...')
-            print('        Radius: 0.0005, Layers: 2, Angle range: 0-180°')
+            # Use larger radius for PIV shear vortices
+            shear_radius = 0.003 if self.data_type == 'PIV' else 0.0005
+            print(f'        Radius: {shear_radius}, Layers: 2, Angle range: 0-180°')
             loc_points_PS = extract_velocity_invariants(
                 self.data, self.connectivity, self.PS_shear, 
                 location=self.location, Vortex_Type="PS_shear",
-                radius=0.0005, n_layers=2, start_angle=0, end_angle=180,
+                radius=shear_radius, n_layers=2, start_angle=0, end_angle=180,
                 data_type=self.data_type
             )
             self.loc_points_aux_coords.append(loc_points_PS[:, 0])

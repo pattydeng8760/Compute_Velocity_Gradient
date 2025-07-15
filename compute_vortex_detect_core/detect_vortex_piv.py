@@ -309,7 +309,7 @@ class vortex_piv:
                     self.core_mag = [np.nan]
 
 
-def detect_vortex_piv(source_dir, cut, alpha, var='lambda2', level=-2000, method='area', nb_tasks=None, max_file=None, output_dir='./'):
+def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='precise', nb_tasks=None, max_file=None, output_dir='./'):
     """
     Detect vortices from PIV data using parallel processing.
     

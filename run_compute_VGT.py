@@ -11,10 +11,11 @@ from compute_velocity_gradient_core.utils import init_logging_from_cut
 config = {
     "cut"        : "PIV1",
     #"parent_dir" : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface",
-    'parent_dir' : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data",
+    #'parent_dir' : "/Volumes/LES Data/B_10AOA_LES/PostProc",
+    "parent_dir" : '/Volumes/LES Data/PIV_Data',
     "output_dir" : ".",
     "nproc"      : 16,
-    "reload"     : False,
+    "reload"     : True,
     "nblocks"    : 1200, 
     "data_type"  : "PIV",
     "velocity"   : 30,
