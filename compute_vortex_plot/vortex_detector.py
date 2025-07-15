@@ -210,3 +210,147 @@ def find_squares(a):
     largest_area = bounds[np.argmax(size_bounds)] if size_bounds else []
     
     return bounds, size_bounds, largest_area
+
+
+class piv_vortex:
+    """
+    PIV-specific vortex detection class that works directly with structured PIV data
+    without interpolation.
+    """
+    
+    def __init__(self, pos: str, A: list, B: list, y, z, u, vort, choice: str, level: int, data_grid=None) -> None:
+        """
+        Initialize PIV vortex detection class.
+        
+        Parameters:
+        -----------
+        pos : str
+            Vortex position identifier
+        A : list
+            Lower left corner of search window
+        B : list
+            Upper right corner of search window
+        y : array
+            Y coordinates
+        z : array
+            Z coordinates
+        u : array
+            Velocity field
+        vort : array
+            Vorticity field
+        choice : str
+            Detection method ('max', 'precise', 'area')
+        level : int
+            Vorticity threshold level
+        data_grid : PIVStructuredGrid, optional
+            Pre-computed structured grid for efficiency
+        """
+        assert choice in ['max', 'precise', 'area'], "Invalid choice for PIV vortex detection."
+        self.position = pos
+        self.location = self.vortex_loc(A, B)
+        self.data_grid = data_grid
+        self.core = self.vortex_core_piv(y, z, u, vort, self.location.y, self.location.z, choice, level)
+        
+    class vortex_loc:
+        def __init__(self, A: list, B: list):
+            """Define vortex search location boundaries."""
+            self.y = [min(A[0], B[0]), max(A[0], B[0])]
+            self.z = [min(A[1], B[1]), max(A[1], B[1])]
+            
+    class vortex_core_piv:
+        def __init__(self, y, z, u, vort, y_lim: list, z_lim: list, choice: str, level: int):
+            """
+            Detect vortex core using PIV-optimized methods.
+            
+            Parameters:
+            -----------
+            y : array
+                Y coordinates
+            z : array
+                Z coordinates
+            u : array
+                Velocity field
+            vort : array
+                Vorticity field
+            y_lim : list
+                Y limits for search window
+            z_lim : list
+                Z limits for search window
+            choice : str
+                Detection method
+            level : int
+                Vorticity threshold
+            """
+            if choice == 'max':
+                self._detect_max_piv(y, z, u, vort, y_lim, z_lim)
+            elif choice == 'precise':
+                self._detect_precise_piv(y, z, u, vort, y_lim, z_lim, level)
+            elif choice == 'area':
+                self._detect_area_piv(y, z, u, vort, y_lim, z_lim, level)
+        
+        def _detect_max_piv(self, y, z, u, vort, y_lim, z_lim):
+            """Detect vortex core using maximum vorticity method for PIV."""
+            mask = (y >= min(y_lim)) & (y <= max(y_lim)) & (z >= min(z_lim)) & (z <= max(z_lim))
+            dummy = vort * mask
+            
+            if np.all(dummy == 0):
+                print("            All PIV vortex values masked in 'max' choice.")
+                self.core_loc = [[np.nan, np.nan]]
+                self.core_mag = [np.nan]
+            else:
+                min_idx = np.argmin(dummy)
+                self.core_loc = [[y[min_idx], z[min_idx]]]
+                self.core_mag = [vort[min_idx]]
+        
+        def _detect_precise_piv(self, y, z, u, vort, y_lim, z_lim, level):
+            """Detect vortex core using precise method without interpolation for PIV."""
+            # For PIV data, work directly with structured data
+            mask_bounds = (y >= min(y_lim)) & (y <= max(y_lim)) & (z >= min(z_lim)) & (z <= max(z_lim))
+            mask_vort = (vort <= level) if level <= 0 else (vort >= level)  # Very sensitive for PIV shear vortices
+            mask_vel = np.abs(u) >= 0.01  # Very low velocity threshold for PIV shear detection
+            
+            combined_mask = mask_bounds & mask_vort & mask_vel
+            
+            if not np.any(combined_mask):
+                print("            No PIV vortex found in 'precise' choice.")
+                self.core_loc = [[np.nan, np.nan]]
+                self.core_mag = [np.nan]
+            else:
+                # Find minimum vorticity in the valid region
+                masked_vort = vort.copy()
+                masked_vort[~combined_mask] = np.nan
+                
+                if np.all(np.isnan(masked_vort)):
+                    self.core_loc = [[np.nan, np.nan]]
+                    self.core_mag = [np.nan]
+                else:
+                    min_idx = np.nanargmin(masked_vort)
+                    self.core_loc = [[y[min_idx], z[min_idx]]]
+                    self.core_mag = [vort[min_idx]]
+        
+        def _detect_area_piv(self, y, z, u, vort, y_lim, z_lim, level):
+            """Detect vortex core using area method for PIV."""
+            # For PIV data, work directly with structured data
+            mask_bounds = (y >= min(y_lim)) & (y <= max(y_lim)) & (z >= min(z_lim)) & (z <= max(z_lim))
+            mask_vort = (vort <= level) if level <= 0 else (vort >= level)  # Very sensitive for PIV shear vortices
+            mask_vel = np.abs(u) >= 0.01  # Very low velocity threshold for PIV shear detection
+            
+            combined_mask = mask_bounds & mask_vort & mask_vel
+            
+            if not np.any(combined_mask):
+                print("            No PIV vortical area found in 'area' choice.")
+                self.core_loc = [[np.nan, np.nan]]
+                self.core_mag = [np.nan]
+            else:
+                # Find center of mass of vortical region
+                valid_indices = np.where(combined_mask)
+                if len(valid_indices[0]) > 0:
+                    center_y = np.mean(y[valid_indices])
+                    center_z = np.mean(z[valid_indices])
+                    self.core_loc = [[center_y, center_z]]
+                    # Find magnitude at vortical region
+                    masked_vort = vort[combined_mask]
+                    self.core_mag = [np.min(masked_vort)]
+                else:
+                    self.core_loc = [[np.nan, np.nan]]
+                    self.core_mag = [np.nan]

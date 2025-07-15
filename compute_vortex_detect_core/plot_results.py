@@ -138,8 +138,8 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     try:
         # Load .mat file for grid data
         data = scipy.io.loadmat(os.path.join(output_dir, f'Grid_{cut_loc}_Data.mat'))
-        y = data['grid_y']
-        z = data['grid_z']
+        y = data['grid_y'] if data_type == 'LES' else data['grid_y']-0.17
+        z = data['grid_z'] if data_type == 'LES' else data['grid_z']-0.16/chord
         u = data['grid_u']
         v = data['grid_v']
         w = data['grid_w']
@@ -151,8 +151,14 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
         S_core_diff = np.load(os.path.join(output_dir, f'S_core_{cut_loc}_Diff.npy'))
         P_core_diff = np.load(os.path.join(output_dir, f'P_core_{cut_loc}_Diff.npy'))
         
-        # Load mask for airfoil surface (if not PIV3)
-        if cut_loc != 'PIV3':
+        if data_type == 'PIV':
+            S_core_loc[:, 0] = S_core_loc[:, 0] - 0.17  # Adjusting x to match the y offset
+            S_core_loc[:, 1] = S_core_loc[:, 1] - 0.16/chord  # Adjusting y to match the chord length
+            P_core_loc[:, 0] = P_core_loc[:, 0] - 0.17  # Adjusting x to match the y offset
+            P_core_loc[:, 1] = P_core_loc[:, 1] - 0.16/chord  # Adjusting y to match the chord length
+
+        # Load mask for airfoil surface (if not PIV3 and not PIV data)
+        if cut_loc != 'PIV3' and data_type != 'PIV':
             mask_indx = np.load(os.path.join(output_dir, f'Grid_mask_index_{cut_loc}.npy'))
         
         # Check for tertiary vortex data
@@ -162,6 +168,9 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
         if tertiary:
             try:
                 T_core_loc = np.load(os.path.join(output_dir, f'T_core_{cut_loc}.npy'))
+                if data_type == 'PIV':
+                    T_core_loc[:, 0] = T_core_loc[:, 0] - 0.17
+                    T_core_loc[:, 1] = T_core_loc[:, 1] - 0.16/chord
                 T_core_diff = np.load(os.path.join(output_dir, f'T_core_{cut_loc}_Diff.npy'))
             except FileNotFoundError:
                 print(f"Tertiary vortex data not found for {cut_loc}")
@@ -214,33 +223,39 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     plt.contourf(y, z, vort, levels=np.arange(-100, 100, 1), 
                  cmap=custom_cmap, extend='both')
     
-    # Add streamlines
-    plt.streamplot(y, z, v, w, 
-                   color='k', linewidth=1.5, arrowsize=1, density=2)
+    # Add streamlines - handle PIV data differently due to grid irregularities
+    try:
+        # For LES data, use normal streamlines
+        plt.streamplot(y, z, v, w, 
+                        color='k', linewidth=1.5, arrowsize=1, density=2)
+    except Exception as e:
+        print(f"    Warning: Could not create streamlines for {data_type} data: {e}")
+        print("    Continuing without streamlines...")
     
-    # Add airfoil mask for non-PIV3 cases
-    if cut_loc != 'PIV3':
+    # Add airfoil mask for non-PIV3 and non-PIV cases (PIV data doesn't have airfoil)
+    if cut_loc != 'PIV3' and data_type != 'PIV':
         plt.imshow(~mask_indx, extent=(-0.05 / chord, 0.05 / chord, -0.15, 0.15), 
                    alpha=0.5, cmap='gray', aspect='auto')
         
         # Add airfoil annotations
         mask_indices = np.argwhere(mask_indx)
-        y_min = np.min(y[mask_indices[:,0], mask_indices[:,1]])
-        y_max = np.max(y[mask_indices[:,0], mask_indices[:,1]])
-        z_min = np.min(z[mask_indices[:,0], mask_indices[:,1]])
-        z_max = np.max(z[mask_indices[:,0], mask_indices[:,1]])
+        if len(mask_indices) > 0:  # Check if mask has any True values
+            y_min = np.min(y[mask_indices[:,0], mask_indices[:,1]])
+            y_max = np.max(y[mask_indices[:,0], mask_indices[:,1]])
+            z_min = np.min(z[mask_indices[:,0], mask_indices[:,1]])
+            z_max = np.max(z[mask_indices[:,0], mask_indices[:,1]])
         
-        z_top = -0.02
-        z_bottom = -0.05
-        ss_y = y_min + 0.02
-        ps_y = y_max - 0.02
-        
-        plt.text((y_min + y_max) / 2, z_top, 'Tip', fontsize=MEDIUM_SIZE, 
-                ha='center', va='bottom', color='black')
-        plt.text(ss_y, z_bottom, 'PS', fontsize=MEDIUM_SIZE, 
-                ha='right', va='center', color='black')
-        plt.text(ps_y, z_bottom, 'SS', fontsize=MEDIUM_SIZE, 
-                ha='left', va='center', color='black')
+            z_top = -0.02
+            z_bottom = -0.05
+            ss_y = y_min + 0.02
+            ps_y = y_max - 0.02
+            
+            plt.text((y_min + y_max) / 2, z_top, 'Tip', fontsize=MEDIUM_SIZE, 
+                    ha='center', va='bottom', color='black')
+            plt.text(ss_y, z_bottom, 'PS', fontsize=MEDIUM_SIZE, 
+                    ha='right', va='center', color='black')
+            plt.text(ps_y, z_bottom, 'SS', fontsize=MEDIUM_SIZE, 
+                    ha='left', va='center', color='black')
     
     # Scale and plot vortex core locations
     label_secondary = "Secondary \nVortex"
@@ -369,24 +384,37 @@ def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.
     # Create histogram plot
     nbins = 20
     
-    # Calculate histograms
-    P_counts, P_bins = np.histogram(np.ndarray.flatten(P_core_diff) * 1.5, bins=nbins)
-    S_counts, S_bins = np.histogram(np.ndarray.flatten(S_core_diff), bins=P_bins)
+    # Filter out NaN values before calculating histograms
+    P_core_diff_clean = P_core_diff[~np.isnan(P_core_diff)]
+    S_core_diff_clean = S_core_diff[~np.isnan(S_core_diff)]
     
-    S_mean = np.mean(S_core_diff)
-    P_mean = np.mean(P_core_diff)
+    # Skip plotting if all data is NaN
+    if len(P_core_diff_clean) == 0 or len(S_core_diff_clean) == 0:
+        print(f"    Warning: No valid data for probability distribution plot at {cut_loc}")
+        return
+    
+    # Calculate histograms
+    P_counts, P_bins = np.histogram(np.ndarray.flatten(P_core_diff_clean) * 1.5, bins=nbins)
+    S_counts, S_bins = np.histogram(np.ndarray.flatten(S_core_diff_clean), bins=P_bins)
+    
+    S_mean = np.mean(S_core_diff_clean)
+    P_mean = np.mean(P_core_diff_clean)
     
     # Normalize the counts to get the density
-    S_density = S_counts / len(S_core_diff)
-    P_density = P_counts / len(P_core_diff)
+    S_density = S_counts / len(S_core_diff_clean)
+    P_density = P_counts / len(P_core_diff_clean)
     
     if len(P_density) >= 2:
         P_density[-2], P_density[-1] = 0.5 * P_density[-3], 0.5 * P_density[-3]
     
     if tertiary and len(T_core_diff) > 0:
-        T_counts, T_bins = np.histogram(np.ndarray.flatten(T_core_diff), bins=P_bins)
-        T_density = T_counts / len(T_core_diff)
-        T_mean = np.mean(T_core_diff)
+        T_core_diff_clean = T_core_diff[~np.isnan(T_core_diff)]
+        if len(T_core_diff_clean) > 0:
+            T_counts, T_bins = np.histogram(np.ndarray.flatten(T_core_diff_clean), bins=P_bins)
+            T_density = T_counts / len(T_core_diff_clean)
+            T_mean = np.mean(T_core_diff_clean)
+        else:
+            tertiary = False  # Skip tertiary vortex if all data is NaN
     
     # Create the plot
     plt.hist(S_bins[:-1], P_bins, weights=S_density, edgecolor='black', color='red', alpha=0.5, 

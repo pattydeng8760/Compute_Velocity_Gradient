@@ -7,7 +7,7 @@ def main(args=None):
         args = parse_arguments()
 
     # 2) Redirect stdout to log_<cut>.txt and set up logging
-    init_logging_from_cut(args.cut)
+    init_logging_from_cut(args.cut, args.data_type)
 
     # 3) Build and run
     runner = VortexDetect(args)

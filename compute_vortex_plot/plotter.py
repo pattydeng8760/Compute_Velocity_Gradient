@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
+from matplotlib.ticker import MaxNLocator
 from scipy.ndimage import gaussian_filter
 from sklearn.decomposition import PCA
 from .utils import print
@@ -42,7 +43,7 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     
     cs1 = axs[0, 0].contourf(data_grid.grid_y / chord, 
                               data_grid.grid_z / chord + 0.1034 / chord, 
-                              data_grid.Phat, levels=np.arange(-1, 1, 0.01), 
+                              data_grid.Phat, levels=np.linspace(-1, 1, 201), 
                               cmap=custom_cmap, extend='both')
     axs[0, 0].set_title('$\hat{P}$')
     axs[0, 0].set_aspect('equal')
@@ -56,7 +57,7 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     
     cs2 = axs[0, 1].contourf(data_grid.grid_y / chord, 
                               data_grid.grid_z / chord + 0.1034 / chord, 
-                              data_grid.Qhat, levels=np.arange(-1, 1, 0.01), 
+                              data_grid.Qhat, levels=np.linspace(-1, 1, 201), 
                               cmap=custom_cmap, extend='both')
     axs[0, 1].set_title('$\hat{Q}$')
     axs[0, 1].set_aspect('equal')
@@ -66,7 +67,7 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     # --- Plot Rhat ---
     cs3 = axs[0, 2].contourf(data_grid.grid_y / chord, 
                               data_grid.grid_z / chord + 0.1034 / chord, 
-                              data_grid.Rhat, levels=np.arange(-0.25, 0.25, 0.01), 
+                              data_grid.Rhat, levels=np.linspace(-0.25, 0.25, 51), 
                               cmap=custom_cmap, extend='both')
     axs[0, 2].set_title('$\hat{R}$')
     axs[0, 2].set_aspect('equal')
@@ -76,17 +77,16 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     # --- Plot Vorticity ---
     cmap = plt.cm.bwr
     new_cmap = cmap(np.linspace(0, 1, 256))
-    vmin, vmax = -120, 120
+    vmin, vmax = -100, 100
     lower_bound, upper_bound = -20, 20
     n_colors = len(new_cmap)
     lower_idx = int((lower_bound - vmin) / (vmax - vmin) * n_colors)
     upper_idx = int((upper_bound - vmin) / (vmax - vmin) * n_colors)
     new_cmap[lower_idx:upper_idx] = [1, 1, 1, 1]
     custom_cmap = mcolors.ListedColormap(new_cmap)
-
     cs4 = axs[1, 0].contourf(data_grid.grid_y / chord, 
                               data_grid.grid_z / chord + 0.1034 / chord, 
-                              data_grid.vort_x * chord / 30, levels=np.arange(-120, 120, 5), 
+                              data_grid.vort_x*chord/30, levels=np.linspace(-120, 120, 201), 
                               cmap=custom_cmap, extend='both')
     axs[1, 0].set_title('$\Omega_x c/U_{\infty}$')
     axs[1, 0].set_aspect('equal')
@@ -105,8 +105,8 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     # --- Plot Strain Rate ---
     cmap = plt.cm.jet
     new_cmap = cmap(np.linspace(0, 1, 256))
-    vmin, vmax = 0, 150
-    lower_bound = 50
+    vmin, vmax = 0, 100
+    lower_bound = 30
     n_colors = len(new_cmap)
     lower_idx = int((lower_bound - vmin) / (vmax - vmin) * n_colors)
     new_cmap[:lower_idx] = [1, 1, 1, 1]
@@ -114,7 +114,7 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     
     cs5 = axs[1, 1].contourf(data_grid.grid_y / chord, 
                               data_grid.grid_z / chord + 0.1034 / chord, 
-                              data_grid.mean_SR * chord / 30, levels=np.arange(0, 150, 1), 
+                              data_grid.mean_SR * chord / 30, levels=np.linspace(0, 100, 101), 
                               cmap=custom_cmap, extend='both')
     axs[1, 1].set_title('$S_{ij}S_{ij} c^2/U_{\infty}^2$')
     axs[1, 1].set_aspect('equal')
@@ -135,7 +135,7 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     cs6 = axs[1, 2].contourf(data_grid.grid_y / chord, 
                               data_grid.grid_z / chord + 0.1034 / chord, 
                               data_grid.Pressure_Hessian/(0.5*30**2*0.305), 
-                              levels=np.arange(-10000, 10000, 100), 
+                              levels=np.linspace(-10000, 10000, 201), 
                               cmap=custom_cmap, extend='both')
     axs[1, 2].set_title(r'${\nabla}^2 p / (1/2 \rho U_{\infty}^2)$')
     axs[1, 2].set_aspect('equal')
@@ -143,13 +143,17 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
     axs[1, 2].set_ylabel('$z/c$')
     
     # Add colorbars
+
+
     for ax, cs in zip(axs.flat, [cs1, cs2, cs3, cs4, cs5, cs6]):
-        fig.colorbar(cs, ax=ax, orientation='vertical', pad=0.05)
+        cbar = fig.colorbar(cs, ax=ax, orientation='vertical', pad=0.05)
+        cbar.locator = MaxNLocator(nbins=5, prune='both')  # Set ~5 nice ticks, remove extremes
+        cbar.update_ticks()
     
     fig.tight_layout()
     
     # Add airfoil mask for non-PIV3 locations
-    if location != 'PIV3':
+    if location != 'PIV3' and hasattr(data_grid, 'mask_indx') and data_grid.mask_indx is not None:
         mask = data_grid.mask_indx
         for ax in axs.flatten():
             ax.imshow(~mask, extent=(-0.05/chord, 0.05/chord, -0.15, 0.15), 
@@ -169,8 +173,18 @@ def plot_local_invariants_QR(location, R_hat, Q_hat, Vortex_Type: str, data_type
         R_vals = R_hat[i, :]
         Q_vals = Q_hat[i, :]
         
+        # Filter out NaN values before creating histogram
+        valid_mask = ~(np.isnan(R_vals) | np.isnan(Q_vals))
+        R_vals_clean = R_vals[valid_mask]
+        Q_vals_clean = Q_vals[valid_mask]
+        
+        # Skip if no valid data
+        if len(R_vals_clean) == 0:
+            print(f"    Warning: No valid data for {Vortex_Type} QR plot")
+            continue
+            
         # Create 2D histogram
-        h, edgesR, edgesQ = np.histogram2d(R_vals, Q_vals, bins=bins)
+        h, edgesR, edgesQ = np.histogram2d(R_vals_clean, Q_vals_clean, bins=bins)
         totalPoints = R_vals.size
         binArea = np.diff(edgesR[:2])[0] * np.diff(edgesQ[:2])[0]
         pdf = h / totalPoints / binArea
@@ -227,8 +241,18 @@ def plot_local_invariants_Qs_Rs(location, Rs_hat, Qs_hat, Vortex_Type: str, data
         R_vals = Rs_hat[i, :]
         Q_vals = Qs_hat[i, :]
         
+        # Filter out NaN values before creating histogram
+        valid_mask = ~(np.isnan(R_vals) | np.isnan(Q_vals))
+        R_vals_clean = R_vals[valid_mask]
+        Q_vals_clean = Q_vals[valid_mask]
+        
+        # Skip if no valid data
+        if len(R_vals_clean) == 0:
+            print(f"    Warning: No valid data for {Vortex_Type} plot")
+            continue
+            
         # Create 2D histogram
-        h, edgesR, edgesQ = np.histogram2d(R_vals, Q_vals, bins=bins)
+        h, edgesR, edgesQ = np.histogram2d(R_vals_clean, Q_vals_clean, bins=bins)
         totalPoints = R_vals.size
         binArea = np.diff(edgesR[:2])[0] * np.diff(edgesQ[:2])[0]
         pdf = h / totalPoints / binArea
@@ -285,8 +309,18 @@ def plot_local_invariants_Qs_Qw(location, Qw_hat, Qs_hat, Vortex_Type: str, data
         R_vals = Qw_hat[i, :]
         Q_vals = -Qs_hat[i, :]
         
+        # Filter out NaN values before creating histogram
+        valid_mask = ~(np.isnan(R_vals) | np.isnan(Q_vals))
+        R_vals_clean = R_vals[valid_mask]
+        Q_vals_clean = Q_vals[valid_mask]
+        
+        # Skip if no valid data
+        if len(R_vals_clean) == 0:
+            print(f"    Warning: No valid data for {Vortex_Type} plot")
+            continue
+            
         # Create 2D histogram
-        h, edgesR, edgesQ = np.histogram2d(R_vals, Q_vals, bins=bins)
+        h, edgesR, edgesQ = np.histogram2d(R_vals_clean, Q_vals_clean, bins=bins)
         totalPoints = R_vals.size
         binArea = np.diff(edgesR[:2])[0] * np.diff(edgesQ[:2])[0]
         pdf = h / totalPoints / binArea

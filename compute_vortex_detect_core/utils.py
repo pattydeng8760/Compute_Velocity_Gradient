@@ -20,7 +20,8 @@ def setup_logging(log_file):
 def init_logging_from_cut(cut, data_type='LES'):
     """Initialize logging and redirect stdout to a log file."""
     log_filename = f"log_vortex_detect_{cut}_{data_type}.txt"
-    
+    if os.path.exists(log_filename):
+        os.remove(log_filename)
     # Set up logging configuration
     logging.basicConfig(
         level=logging.INFO,

@@ -6,7 +6,7 @@ import matplotlib.ticker as ticker
 from .utils import print
 
 
-def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, dir, tertiary=False):
+def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, dir, tertiary=False, data_type:str='LES'):
     """
     Save vortex detection results to multiple file formats.
     
@@ -58,21 +58,38 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
     # Saving the grid data for plotting
     chord = 0.3048
     # Saving the numpy file
-    np.save(os.path.join(dir, f'Grid_y_{cut}'), vars.grid_y / chord)
-    np.save(os.path.join(dir, f'Grid_z_{cut}'), vars.grid_z / chord + 0.1034/chord)
-    np.save(os.path.join(dir, f'Grid_vort_{cut}'), vars.grid_vort)
-    np.save(os.path.join(dir, f'Grid_u_{cut}'), vars.grid_u)
-    np.save(os.path.join(dir, f'Grid_v_{cut}'), vars.grid_v)
-    np.save(os.path.join(dir, f'Grid_w_{cut}'), vars.grid_w)
-    # Save the data as matlab file
-    scipy.io.savemat(os.path.join(dir, f'Grid_{cut}_Data.mat'), 
-                     {'grid_y': vars.grid_y/chord, 'grid_z': vars.grid_z/ chord + 0.1034/chord, 'grid_vort': vars.grid_vort, 'grid_u': vars.grid_u ,'grid_v': vars.grid_v, 'grid_w': vars.grid_w})
-    if tertiary== False:
-        np.save(os.path.join(dir, f'Grid_mask_index_{cut}'), vars.mask_indx)
-    P_core_loc[:,0] = P_core_loc[:,0]/chord
-    P_core_loc[:,1] = P_core_loc[:,1]/chord + 0.1034/chord
-    S_core_loc[:,0] = S_core_loc[:,0]/chord
-    S_core_loc[:,1] = S_core_loc[:,1]/chord + 0.1034/chord
+    if data_type == 'PIV':
+        np.save(os.path.join(dir, f'Grid_y_{cut}'), vars.grid_y / chord)
+        np.save(os.path.join(dir, f'Grid_z_{cut}'), vars.grid_z / chord)
+        np.save(os.path.join(dir, f'Grid_vort_{cut}'), vars.grid_vort*0.3048/chord)
+        np.save(os.path.join(dir, f'Grid_u_{cut}'), vars.grid_u)
+        np.save(os.path.join(dir, f'Grid_v_{cut}'), vars.grid_v)
+        np.save(os.path.join(dir, f'Grid_w_{cut}'), vars.grid_w)
+        # Save the data as matlab fil
+        scipy.io.savemat(os.path.join(dir, f'Grid_{cut}_Data.mat'), 
+                        {'grid_y': vars.grid_y/chord, 'grid_z': vars.grid_z/ chord, 'grid_vort': vars.grid_vort, 'grid_u': vars.grid_u ,'grid_v': vars.grid_v, 'grid_w': vars.grid_w})
+        if tertiary== False:
+            np.save(os.path.join(dir, f'Grid_mask_index_{cut}'), vars.mask_indx)
+        P_core_loc[:,0] = P_core_loc[:,0]/chord
+        P_core_loc[:,1] = P_core_loc[:,1]/chord
+        S_core_loc[:,0] = S_core_loc[:,0]/chord
+        S_core_loc[:,1] = S_core_loc[:,1]/chord
+    else: 
+        np.save(os.path.join(dir, f'Grid_y_{cut}'), vars.grid_y / chord)
+        np.save(os.path.join(dir, f'Grid_z_{cut}'), vars.grid_z / chord + 0.1034/chord)
+        np.save(os.path.join(dir, f'Grid_vort_{cut}'), vars.grid_vort)
+        np.save(os.path.join(dir, f'Grid_u_{cut}'), vars.grid_u)
+        np.save(os.path.join(dir, f'Grid_v_{cut}'), vars.grid_v)
+        np.save(os.path.join(dir, f'Grid_w_{cut}'), vars.grid_w)
+        # Save the data as matlab file
+        scipy.io.savemat(os.path.join(dir, f'Grid_{cut}_Data.mat'), 
+                        {'grid_y': vars.grid_y/chord, 'grid_z': vars.grid_z/ chord + 0.1034/chord, 'grid_vort': vars.grid_vort, 'grid_u': vars.grid_u ,'grid_v': vars.grid_v, 'grid_w': vars.grid_w})
+        if tertiary== False:
+            np.save(os.path.join(dir, f'Grid_mask_index_{cut}'), vars.mask_indx)
+        P_core_loc[:,0] = P_core_loc[:,0]/chord
+        P_core_loc[:,1] = P_core_loc[:,1]/chord + 0.1034/chord
+        S_core_loc[:,0] = S_core_loc[:,0]/chord
+        S_core_loc[:,1] = S_core_loc[:,1]/chord + 0.1034/chord
     # Saving the vortex core locations and trace differences
     np.save(os.path.join(dir, f'S_core_{cut}'), S_core_loc)
     np.save(os.path.join(dir, f'P_core_{cut}'), P_core_loc)
@@ -93,9 +110,15 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
     #         f.create_dataset('T_core', np.array(T_core_loc),dtype='float32')
     #         f.create_dataset('T_core_diff', np.array(T_Vort_Diff.diff),dtype='float32')
     if tertiary:
-        T_core_loc[:,0] = T_core_loc[:,0]/chord
-        T_core_loc[:,1] = T_core_loc[:,1]/chord + 0.1034/chord  
-        np.save(os.path.join(dir, f'T_core_{cut}'), T_core_loc)
-        np.save(os.path.join(dir, f'T_core_{cut}_Diff'), T_Vort_Diff.diff)
+        if data_type == 'LES':
+            T_core_loc[:,0] = T_core_loc[:,0]/chord
+            T_core_loc[:,1] = T_core_loc[:,1]/chord + 0.1034/chord  
+            np.save(os.path.join(dir, f'T_core_{cut}'), T_core_loc)
+            np.save(os.path.join(dir, f'T_core_{cut}_Diff'), T_Vort_Diff.diff)
+        else: 
+            T_core_loc[:,0] = T_core_loc[:,0]/chord
+            T_core_loc[:,1] = T_core_loc[:,1]/chord
+            np.save(os.path.join(dir, f'T_core_{cut}'), T_core_loc)
+            np.save(os.path.join(dir, f'T_core_{cut}_Diff'), T_Vort_Diff.diff)
 
 

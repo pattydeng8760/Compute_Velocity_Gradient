@@ -6,6 +6,7 @@ import argparse
 from multiprocessing import Pool, cpu_count
 from .utils import timer, print, init_logging_from_cut
 from .detect_vortex import detect_vortex
+from .detect_vortex_piv import detect_vortex_piv
 from .plot_results import plot_all_results
 
 def parse_arguments():
@@ -24,7 +25,7 @@ def parse_arguments():
     parser.add_argument(
         "--cut", "-c",
         type=str, required=True,
-        help="Cutplane identifier (e.g., 'PIV1'). Directory is Cut_<cut>_VGT/ under parent_dir."
+        help="Cutplane identifier (e.g., 'PIV1', '030_TE'). For LES: Cut_<cut>_VGT/, for PIV: AoA<alpha>_xc_<cut>/U<velocity>/PIV_Data/"
     )
     parser.add_argument(
         "--parent-dir", "-p",
@@ -60,8 +61,14 @@ def parse_arguments():
     parser.add_argument(
         "--angle-of-attack", "-a",
         type=int,
-        default=5,
+        default=10,
         help="Angle of attack for window boundary selection."
+    )
+    parser.add_argument(
+        "--velocity", "-v",
+        type=int,
+        default=30,
+        help="Velocity for PIV data directory structure (default: 30 m/s)."
     )
     parser.add_argument(
         "--plot", 
@@ -102,8 +109,18 @@ class VortexDetect:
         self.plot = args.plot
         self.plot_only = args.plot_only
         
-        # Set up directories
-        self.source_dir = os.path.join(self.parent_dir, f'Cut_{self.cut}_VGT')
+        # Set up directories based on data type
+        if self.data_type == 'LES':
+            self.source_dir = os.path.join(self.parent_dir, f'Cut_{self.cut}_VGT')
+        elif self.data_type == 'PIV':
+            # PIV data follows the same structure as velocity_gradient_core
+            velocity = getattr(args, 'velocity', 30)  # Default velocity
+            cut_map = {
+            "10": {"PIV1": "058","PIV2": "078","PIV3": "105"},
+            "5": {"PIV1": "060","PIV2": "080"}}
+            mapped_cut = cut_map[str(self.alpha)][self.cut]
+            self.source_dir = os.path.join(self.parent_dir, f"AoA{str(int(self.alpha))}_xc_{mapped_cut}",f"U{str(int(velocity))}","PIV_Data")
+            
         self.sol_dir = f'Vortex_Detect_Results_{self.cut}_{self.data_type}'
         
         # Create output directory
@@ -146,16 +163,27 @@ class VortexDetect:
                 print('    Please run vortex detection first without --plot-only flag.')
                 return None
         else:
-            # Detect vortices
-            S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars = detect_vortex(
-                self.source_dir, 
-                self.cut, 
-                self.alpha, 
-                self.method, 
-                nb_tasks=self.nproc, 
-                max_file=self.max_file, 
-                output_dir=self.sol_dir
-            )
+            # Detect vortices based on data type
+            if self.data_type == 'LES':
+                S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars = detect_vortex(
+                    self.source_dir, 
+                    self.cut, 
+                    self.alpha, 
+                    self.method, 
+                    nb_tasks=self.nproc, 
+                    max_file=self.max_file, 
+                    output_dir=self.sol_dir
+                )
+            elif self.data_type == 'PIV':
+                S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars = detect_vortex_piv(
+                    self.source_dir, 
+                    self.cut, 
+                    self.alpha, 
+                    self.method, 
+                    nb_tasks=self.nproc, 
+                    max_file=self.max_file, 
+                    output_dir=self.sol_dir
+                )
             
             # Plot results if requested
             if self.plot:

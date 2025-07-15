@@ -129,7 +129,8 @@ The module generates the following output files:
 - `Local_Velocity_Invariants_PCA_{location}_secondary.png`: Secondary vortex PCA profile
 
 ### Data Files
-- `Velocity_Invariants_Core_B_10AOA_LES_U30.h5`: Combined extracted core data
+- `Velocity_Invariants_Core_B_10AOA_LES_U30.h5`: Combined extracted core data (LES)
+- `Velocity_Invariants_Core_B_10AOA_PIV_U30.h5`: Combined extracted core data (PIV)
 - `log_vortex_plot_{location}_{data_type}.txt`: Processing log file
 
 ## Data Processing
@@ -138,14 +139,28 @@ The module generates the following output files:
 
 - **LES**: Large Eddy Simulation data from CFD simulations
   - Coordinates: X (streamwise), Y (wall normal), Z (spanwise)
+  - Data path: `Velocity_Invariants_{location}_LES/`
 - **PIV**: Particle Image Velocimetry experimental data
-  - Coordinates: X (wall normal), Y (spanwise), Z (streamwise)
+  - Original coordinates: X (wall normal), Y (spanwise), Z (streamwise)
+  - Automatically mapped to LES coordinate system for processing
+  - Data path: `Velocity_Invariants_{location}_PIV/`
+  - Uses PIV-specific window boundaries and detection parameters
 
 ### Vortex Detection Methods
 
 - **max**: Maximum-based detection using peak vorticity
-- **precise**: Precise detection with refined criteria and airfoil masking
-- **area**: Area-based detection using center of largest connected area
+- **precise**: Precise detection with refined criteria and airfoil masking (preferred for LES)
+- **area**: Area-based detection using center of largest connected area (preferred for PIV)
+
+### PIV-Specific Processing
+
+The module automatically handles PIV data differences:
+
+- **Coordinate Mapping**: PIV coordinates are mapped to LES system for consistent processing
+- **Window Boundaries**: Uses PIV-specific window boundaries from `get_window_boundaries_PIV()`
+- **Detection Parameters**: Adjusted vorticity thresholds and detection methods for PIV data
+- **Grid Bounds**: Automatic detection of PIV data bounds for grid interpolation
+- **Data Output**: Separate HDF5 files for PIV results
 
 ### Invariant Types
 
