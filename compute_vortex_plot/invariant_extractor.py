@@ -73,7 +73,7 @@ def find_closest_indices_and_adjacent_cells(core_loc, grid, connectivity, n=6, r
     
     return loc_points, closest_indices, adjacent_points_list
 
-def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_list):
+def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_list, data_type='LES'):
     """
     Extract and stack variable data from core and adjacent cells.
     
@@ -85,6 +85,8 @@ def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_li
         Core cell indices
     adjacent_points_list : list
         List of adjacent cell sets
+    data_type : str
+        Data type ('LES' or 'PIV')
     
     Returns:
     --------
@@ -97,15 +99,22 @@ def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_li
     for core, adj_set in zip(core_indices, adjacent_points_list):
         # Ensure all indices are integers
         core_int = int(core)
-        adj_set_int = [int(idx) for idx in adj_set if isinstance(idx, (int, float, np.integer))]
-        cell_indices = [core_int] + sorted(adj_set_int)
+        
+        if data_type == 'PIV':
+            # For PIV data, only extract core position without adjacent layers
+            cell_indices = [core_int]
+        else:
+            # For LES data, extract core and adjacent cells
+            adj_set_int = [int(idx) for idx in adj_set if isinstance(idx, (int, float, np.integer))]
+            cell_indices = [core_int] + sorted(adj_set_int)
+        
         data = variable_all[cell_indices, :]
         stacked = data.reshape(-1)
         stacked_list.append(stacked)
     
     return np.vstack(stacked_list)
 
-def extract_mean_variable(variable_all, core_indices, adjacent_points_list):
+def extract_mean_variable(variable_all, core_indices, adjacent_points_list, data_type='LES'):
     """
     Extract mean variable values from core and adjacent cells.
     
@@ -117,6 +126,8 @@ def extract_mean_variable(variable_all, core_indices, adjacent_points_list):
         Core cell indices
     adjacent_points_list : list
         List of adjacent cell sets
+    data_type : str
+        Data type ('LES' or 'PIV')
     
     Returns:
     --------
@@ -128,8 +139,15 @@ def extract_mean_variable(variable_all, core_indices, adjacent_points_list):
     for core, adj_set in zip(core_indices, adjacent_points_list):
         # Ensure all indices are integers
         core_int = int(core)
-        adj_set_int = [int(idx) for idx in adj_set if isinstance(idx, (int, float, np.integer))]
-        cell_indices = [core_int] + sorted(adj_set_int)
+        
+        if data_type == 'PIV':
+            # For PIV data, only extract core position without adjacent layers
+            cell_indices = [core_int]
+        else:
+            # For LES data, extract core and adjacent cells
+            adj_set_int = [int(idx) for idx in adj_set if isinstance(idx, (int, float, np.integer))]
+            cell_indices = [core_int] + sorted(adj_set_int)
+        
         data = variable_all[cell_indices]
         avg_value = np.mean(data)
         averaged_list.append(avg_value)
@@ -177,6 +195,8 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     grid = [data['y'], data['z']]
     
     # Find closest indices and adjacent cells
+    if data_type == 'PIV':
+        n_layers = 0  # No layers for PIV data
     loc_points, closest_indices, adjacent_points_list = find_closest_indices_and_adjacent_cells(
         Vortex.core.core_loc[0], grid, connectivity, 
         n=n, radius=radius, n_layers=n_layers, 
@@ -184,18 +204,18 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     )
     
     # Extract invariant data
-    Phat = extract_variable_data_stacked(data['Phat_all'], closest_indices, adjacent_points_list)
-    Qhat = extract_variable_data_stacked(data['Qhat_all'], closest_indices, adjacent_points_list)
-    Rhat = extract_variable_data_stacked(data['Rhat_all'], closest_indices, adjacent_points_list)
-    Rs = extract_variable_data_stacked(data['Rs_all'], closest_indices, adjacent_points_list)
-    Qs = extract_variable_data_stacked(data['Qs_all'], closest_indices, adjacent_points_list)
-    Qw = extract_variable_data_stacked(data['Qw_all'], closest_indices, adjacent_points_list)
+    Phat = extract_variable_data_stacked(data['Phat_all'], closest_indices, adjacent_points_list, data_type)
+    Qhat = extract_variable_data_stacked(data['Qhat_all'], closest_indices, adjacent_points_list, data_type)
+    Rhat = extract_variable_data_stacked(data['Rhat_all'], closest_indices, adjacent_points_list, data_type)
+    Rs = extract_variable_data_stacked(data['Rs_all'], closest_indices, adjacent_points_list, data_type)
+    Qs = extract_variable_data_stacked(data['Qs_all'], closest_indices, adjacent_points_list, data_type)
+    Qw = extract_variable_data_stacked(data['Qw_all'], closest_indices, adjacent_points_list, data_type)
     
     # Extract mean values for normalization
-    var_A = extract_mean_variable(data['var_A'], closest_indices, adjacent_points_list)
-    var_S = extract_mean_variable(data['var_S'], closest_indices, adjacent_points_list)
-    var_omega = extract_mean_variable(data['var_omega'], closest_indices, adjacent_points_list)
-    mean_SR = extract_mean_variable(data['mean_SR'], closest_indices, adjacent_points_list)
+    var_A = extract_mean_variable(data['var_A'], closest_indices, adjacent_points_list, data_type)
+    var_S = extract_mean_variable(data['var_S'], closest_indices, adjacent_points_list, data_type)
+    var_omega = extract_mean_variable(data['var_omega'], closest_indices, adjacent_points_list, data_type)
+    mean_SR = extract_mean_variable(data['mean_SR'], closest_indices, adjacent_points_list, data_type)
     
     # Normalize strain and rotation invariants
     Rs = Rs / (var_S[:, np.newaxis] ** (3/2))

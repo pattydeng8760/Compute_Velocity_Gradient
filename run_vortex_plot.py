@@ -16,7 +16,7 @@ from compute_vortex_plot.utils import init_logging_from_cut
 
 # Configuration dictionary with default parameters
 config = {
-    "cut"              : "PIV3",                # Cutplane identifier
+    "cut"              : "PIV1",                # Cutplane identifier
     "data_type"        : "PIV",                 # Data type: 'LES' or 'PIV'
     "chord"            : 0.305,                 # Chord length for normalization
     "velocity"         : 30,                    # Free stream velocity

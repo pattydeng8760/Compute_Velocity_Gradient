@@ -81,7 +81,7 @@ class VelocityInvariant:
         self.data_type = args.data_type
         self.velocity    = args.velocity
         self.angle_of_attack = args.angle_of_attack
-        self.limited_gradient = getattr(args, 'limited_gradient', False)
+        self.limited_gradient = args.limited_gradient
         
         # Update output directory name to include _limited suffix if flag is set
         output_suffix = f"_{self.data_type}"
