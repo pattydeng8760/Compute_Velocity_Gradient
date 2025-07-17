@@ -63,6 +63,11 @@ def parse_arguments():
         type=float, default=10.0,
         help="Angle of attack of the data in degrees."
     )
+    parser.add_argument(
+        "--limited-gradient", "-lg",
+        action="store_true",
+        help="Use limited gradient computation for LES data (only applies to LES data type). Computes with limited VGT tensor corresponding to stereo-PIV availability where dv/dx and dw/dx are unavailable, and du/dx is calculated from incompressible assumption."
+    )
     return parser.parse_args()
 
 
@@ -76,7 +81,13 @@ class VelocityInvariant:
         self.data_type = args.data_type
         self.velocity    = args.velocity
         self.angle_of_attack = args.angle_of_attack
-        self.output  = os.path.join(args.output_dir,f"Velocity_Invariants_{self.cut}_{self.data_type}")
+        self.limited_gradient = getattr(args, 'limited_gradient', False)
+        
+        # Update output directory name to include _limited suffix if flag is set
+        output_suffix = f"_{self.data_type}"
+        if self.limited_gradient and self.data_type == 'LES':
+            output_suffix += "_limited"
+        self.output  = os.path.join(args.output_dir,f"Velocity_Invariants_{self.cut}{output_suffix}")
         if not os.path.exists(self.output):
             os.makedirs(self.output, exist_ok=True)
         if self.data_type == 'LES':
@@ -97,7 +108,7 @@ class VelocityInvariant:
             f"VelocityInvariant(cut={self.cut}, reload={self.reload}, "
             f"parent_dir={self.parent_dir}, nproc={self.nproc}, "
             f"nblocks={self.nblocks}, output_dir={self.output},"
-            f"data_type={self.data_type})"
+            f"data_type={self.data_type}, limited_gradient={self.limited_gradient})"
         )
         
     def extract_velocity_gradient(self):
@@ -134,11 +145,13 @@ class VelocityInvariant:
         print(f'    Reload: {self.reload}')
         print(f'    Velocity: {self.velocity}')
         print(f'    Angle of attack: {self.angle_of_attack}')
+        print(f'    Limited gradient: {self.limited_gradient}')
         print(f'    Total files found: {len(self.arr)}')
         
         # 1) extract the velocity gradient tensor and velocity from the cut
         velocity_gradient, velocity = extract_gradient(
-            self.arr, self.cut, self.reload, self.output, time=None, data_type=self.data_type
+            self.arr, self.cut, self.reload, self.output, time=None, data_type=self.data_type,
+            limited_gradient=self.limited_gradient
         )
         node_count, time_steps = velocity_gradient.shape[2], velocity_gradient.shape[3]
         

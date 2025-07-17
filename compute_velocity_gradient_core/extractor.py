@@ -4,7 +4,7 @@ import h5py
 from antares import Reader
 from .utils import print
 
-def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None, data_type:str='LES'):
+def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None, data_type:str='LES', limited_gradient:bool=False):
     """
     Extract the velocity gradient tensor from the h5 files.
     NOTE: The .h5 files are extracted from the extract_cutplane module and must contain the velocity gradient tensor components as grad_u_x style variable names
@@ -15,6 +15,7 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
         output (str, optional): The output directory to save the velocity gradient tensor. Defaults to './'.
         time (int, optional): The end time step to extract the velocity gradient tensor from. If None, all time steps will be extracted. Defaults to None.
         data_type (str, optional): The type of data to extract the velocity gradient tensor from. Defaults to 'LES'. Can be 'LES' or 'PIV' depending on the underlying data source.
+        limited_gradient (bool, optional): If True and data_type is 'LES', computes limited gradient tensor corresponding to stereo-PIV availability where dv/dx and dw/dx are unavailable, and du/dx is calculated from incompressible assumption. Defaults to False.
     Returns:
         _type_: _description_
     """
@@ -25,8 +26,14 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
     ('grad_v_x', 'node'), ('grad_v_y', 'node'), ('grad_v_z', 'node'),
     ('grad_w_x', 'node'), ('grad_w_y', 'node'), ('grad_w_z', 'node')]
 
-    print(f'----> Extracting velocity gradient tensor from h5 files with {data_type} Data.')
-    otuput_file_name = 'velocity_gradient_tensor_' + cut + '_' + data_type + '.h5'
+    # Modify output filename if limited gradient is enabled
+    gradient_type = "limited" if limited_gradient and data_type == 'LES' else "full"
+    print(f'----> Extracting velocity gradient tensor from h5 files with {data_type} Data ({gradient_type} gradient).')
+    
+    output_suffix = data_type
+    if limited_gradient and data_type == 'LES':
+        output_suffix += '_limited'
+    otuput_file_name = 'velocity_gradient_tensor_' + cut + '_' + output_suffix + '.h5'
     if os.path.exists(os.path.join(output,otuput_file_name)) and not reload:
         print('----> VGT already extracted.')
         print(f'     Reloading extracrted velocity gradient tensor from {output}/velocity_gradient_tensor_{cut}.h5')
@@ -67,6 +74,22 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
             # Extract the velocity gradient tensor
             for i, key in enumerate(VGT_keys):
                 gradients[i][:, idx] = b[0][0][key]
+        
+        # Apply limited gradient modification for LES data if requested
+        if limited_gradient and data_type == 'LES':
+            print('    Applying limited gradient computation for stereo-PIV compatibility...')
+            # Set dv/dx (index 3) and dw/dx (index 6) to zero
+            gradients[3][:, :] = 0.0  # grad_v_x = dv/dx = 0
+            gradients[6][:, :] = 0.0  # grad_w_x = dw/dx = 0
+            
+            # Calculate du/dx from incompressible assumption: du/dx = -(dv/dy + dw/dz)
+            # gradients[0] = grad_u_x, gradients[4] = grad_v_y, gradients[8] = grad_w_z
+            gradients[0][:, :] = -(gradients[4][:, :] + gradients[8][:, :])  # du/dx = -(dv/dy + dw/dz)
+            print('    Limited gradient modifications applied:')
+            print('      - dv/dx set to zero')
+            print('      - dw/dx set to zero')
+            print('      - du/dx calculated from incompressible assumption: du/dx = -(dv/dy + dw/dz)')
+        
         # Save the velocity gradient tensor
         node, time = gradients[0].shape
         velocity_gradient = np.array(gradients).reshape(3, 3, node, time)
