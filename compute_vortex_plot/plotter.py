@@ -98,9 +98,9 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
                       color='black', marker='x', label='Points PV')
     axs[1, 0].scatter(loc_points_SV[0, :] / chord, loc_points_SV[1, :] / chord + 0.1034 / chord, 
                       color='black', marker='*', label='Points SV')
-    if len(loc_points_aux) > 0:
-        axs[1, 0].scatter(loc_points_aux[0, :] / chord, loc_points_aux[1, :] / chord + 0.1034 / chord, 
-                          color='black', marker='^', label='Points Aux')
+    # if len(loc_points_aux) > 0:
+    #     axs[1, 0].scatter(loc_points_aux[0, :] / chord, loc_points_aux[1, :] / chord + 0.1034 / chord, 
+    #                       color='black', marker='^', label='Points Aux')
     
     # --- Plot Strain Rate ---
     cmap = plt.cm.jet

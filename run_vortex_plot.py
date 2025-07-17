@@ -8,14 +8,16 @@ from argparse import Namespace
 
 # Add the current directory to Python path to ensure module can be imported
 sys.path.insert(0, ".")
+# Add window bounds to sys.path
+sys.path.insert(0, "/project/p/plavoie/denggua1/Coordinates")
 
 from compute_vortex_plot.vortex_plot import VortexPlot
 from compute_vortex_plot.utils import init_logging_from_cut
 
 # Configuration dictionary with default parameters
 config = {
-    "cut"              : "095_TE",                # Cutplane identifier
-    "data_type"        : "LES",                 # Data type: 'LES' or 'PIV'
+    "cut"              : "PIV3",                # Cutplane identifier
+    "data_type"        : "PIV",                 # Data type: 'LES' or 'PIV'
     "chord"            : 0.305,                 # Chord length for normalization
     "velocity"         : 30,                    # Free stream velocity
     "angle_of_attack"  : 10,                    # Angle of attack in degrees

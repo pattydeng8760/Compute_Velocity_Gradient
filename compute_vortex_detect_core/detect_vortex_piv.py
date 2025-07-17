@@ -323,7 +323,7 @@ def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='p
         alpha (int): Angle of attack in degrees for window boundary selection
         var (str, optional): Variable name for vortex core tracking (vort_x or lambda2). Defaults to 'vort_x'.
         level (float, optional): Threshold for vortex detection. Defaults to -30.
-        method (str, optional): Vortex detection algorithm. Defaults to 'area'.
+        method (str, optional): Vortex detection algorithm. Defaults to 'precise'.
         nb_tasks (int, optional): Number of parallel processes. Defaults to CPU count.
         max_file (int, optional): Limit number of files processed (for testing). Defaults to None.
         output_dir (str, optional): Directory for saving results. Defaults to './'.
@@ -493,9 +493,6 @@ def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='p
             # Reshape the data to 2D
             grid_y_2d = y_master.reshape(ny, nz, order='F')  # PIV y (wall-normal) to LES y
             grid_z_2d = z_master.reshape(ny, nz, order='F')  # PIV z (span) to LES z
-            
-            #grid_y_2d = y_master.reshape(ny, nz, order='F')
-            #grid_z_2d = z_master.reshape(ny, nz, order='F')
             grid_u_2d = mean_u.reshape(ny, nz, order='F')
             grid_v_2d = mean_v.reshape(ny, nz, order='F')
             grid_w_2d = mean_w.reshape(ny, nz, order='F')
@@ -504,74 +501,7 @@ def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='p
             print(f"    Successfully reshaped to: {grid_y_2d.shape}")
         else:
             print(f"    Warning: PIV data is on sparse grid ({len(y_master)} points vs {ny}x{nz}={ny*nz} full grid)")
-            print(f"    PIV data appears to be 256x188 structured grid, not {ny}x{nz}")
-            
-            # For PIV data, try to infer the actual structured grid size
-            # PIV data is often structured but not on a complete rectangular grid
-            # Try to find the actual grid dimensions by analyzing coordinate patterns
-            
-            # Sort coordinates to understand the structure
-            sorted_indices = np.lexsort((z_master, y_master))
-            y_sorted = y_master[sorted_indices]
-            z_sorted = z_master[sorted_indices]
-            
-            # For PIV data, we know it should be approximately 256x188
-            # Let's try a more robust approach to detect the grid structure
-            
-            # Method 1: Check if it's exactly 256x188
-            if len(y_master) == 256 * 188:
-                print(f"    Confirmed PIV data is 256x188 = {256*188} points")
-                # Try to reshape assuming row-major ordering
-                try:
-                    grid_y_2d = y_master.reshape(256, 188)
-                    grid_z_2d = z_master.reshape(256, 188)
-                    grid_u_2d = mean_u.reshape(256, 188)
-                    grid_v_2d = mean_v.reshape(256, 188)
-                    grid_w_2d = mean_w.reshape(256, 188)
-                    grid_vort_2d = mean_vort.reshape(256, 188)
-                    
-                    print(f"    Successfully reshaped PIV data to: {grid_y_2d.shape}")
-                except:
-                    print(f"    Failed to reshape as 256x188, using interpolation fallback")
-                    # Fall back to interpolation
-                    grid_y_2d, grid_z_2d = np.meshgrid(unique_y, unique_z, indexing='ij')
-                    from scipy.interpolate import griddata
-                    points = np.column_stack((y_master, z_master))
-                    grid_u_2d = griddata(points, mean_u, (grid_y_2d, grid_z_2d), method='nearest')
-                    grid_v_2d = griddata(points, mean_v, (grid_y_2d, grid_z_2d), method='nearest')
-                    grid_w_2d = griddata(points, mean_w, (grid_y_2d, grid_z_2d), method='nearest')
-                    grid_vort_2d = griddata(points, mean_vort, (grid_y_2d, grid_z_2d), method='nearest')
-                    print(f"    Interpolated to grid: {grid_y_2d.shape}")
-            else:
-                print(f"    PIV data size ({len(y_master)}) doesn't match expected 256x188 = {256*188}")
-                print(f"    Trying to determine actual grid structure...")
-                
-                # Method 2: Look for the most likely grid structure that divides evenly
-                possible_ny = []
-                for test_ny in [128, 192, 224, 240, 256, 288, 320, 384, 512]:
-                    if len(y_master) % test_ny == 0:
-                        test_nz = len(y_master) // test_ny
-                        possible_ny.append((test_ny, test_nz))
-                        print(f"      Possible grid: {test_ny} x {test_nz}")
-                
-                if possible_ny:
-                    # Choose the one closest to 256x188 aspect ratio (1.36)
-                    target_ratio = 256/188
-                    best_match = min(possible_ny, key=lambda x: abs(x[0]/x[1] - target_ratio))
-                    ny_actual, nz_actual = best_match
-                    
-                    print(f"    Selected grid structure: {ny_actual} x {nz_actual}")
-                    
-                    grid_y_2d = y_master.reshape(ny_actual, nz_actual)
-                    grid_z_2d = z_master.reshape(ny_actual, nz_actual)
-                    grid_u_2d = mean_u.reshape(ny_actual, nz_actual)
-                    grid_v_2d = mean_v.reshape(ny_actual, nz_actual)
-                    grid_w_2d = mean_w.reshape(ny_actual, nz_actual)
-                    grid_vort_2d = mean_vort.reshape(ny_actual, nz_actual)
-                    
-                    print(f"    Successfully reshaped PIV data to: {grid_y_2d.shape}")
-                else:
-                    raise ValueError(f"Cannot determine appropriate grid structure for {len(y_master)} points")
+            raise ValueError(f"Cannot determine appropriate grid structure for {len(y_master)} points")
     
     class PIVGridData:
         def __init__(self, y_1d, z_1d, u_1d, v_1d, w_1d, vort_1d, 

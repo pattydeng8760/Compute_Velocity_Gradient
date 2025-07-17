@@ -12,27 +12,25 @@ def print(*args, **kwargs):
         logging.info(message)
     else:
         # If no logging configured, use built-in print
-        __builtins__['print'](*args, **kwargs)
-
-def setup_logging(log_file):
-    sys.stdout = open(log_file, "w", buffering=1)
+        import builtins
+        builtins.print(*args, **kwargs)
 
 def init_logging_from_cut(cut, data_type='LES'):
     """Initialize logging and redirect stdout to a log file."""
     log_filename = f"log_vortex_detect_{cut}_{data_type}.txt"
     if os.path.exists(log_filename):
         os.remove(log_filename)
-    # Set up logging configuration
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(message)s',
-        handlers=[
-            logging.FileHandler(log_filename),
-            logging.StreamHandler(sys.stdout)
-        ]
-    )
-    
-    print(f"Logging initialized. Output will be saved to: {log_filename}")
+    sys.stdout = open(log_filename, "w", buffering=1)
+    # # Set up logging configuration
+    # logging.basicConfig(
+    #     level=logging.INFO,
+    #     format='%(message)s',
+    #     handlers=[
+    #         logging.FileHandler(log_filename),
+    #         logging.StreamHandler(sys.stdout)
+    #     ]
+    # )
+    # print(f"Logging initialized. Output will be saved to: {log_filename}")
 
 def timer(func):
     def inner(*args, **kwargs):

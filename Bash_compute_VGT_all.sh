@@ -14,11 +14,11 @@ export PYTHONPATH="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/P
 PARENT_DIR="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface"
 
 # Number of processes and blocks you want:
-NPROC=16
+NPROC=40
 NBLOCKS=1200
 
 # List your cuts here:
-CUTS=("PIV1" "PIV2" "PIV3" "030_TE" "085_TE" "095_TE")
+CUTS=( "095_TE")
 
 for CUT in "${CUTS[@]}"; do
   echo "Processing cut: $CUT"

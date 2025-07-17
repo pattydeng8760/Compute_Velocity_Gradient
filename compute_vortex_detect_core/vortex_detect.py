@@ -169,7 +169,7 @@ class VortexDetect:
                     self.source_dir, 
                     self.cut, 
                     self.alpha, 
-                    self.method, 
+                    method=self.method, 
                     nb_tasks=self.nproc, 
                     max_file=self.max_file, 
                     output_dir=self.sol_dir
@@ -179,7 +179,7 @@ class VortexDetect:
                     self.source_dir, 
                     self.cut, 
                     self.alpha, 
-                    self.method, 
+                    method=self.method, 
                     nb_tasks=self.nproc, 
                     max_file=self.max_file, 
                     output_dir=self.sol_dir
