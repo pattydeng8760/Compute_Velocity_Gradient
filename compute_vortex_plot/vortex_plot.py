@@ -78,6 +78,20 @@ def parse_arguments():
         help="Use limited gradient computation for LES data (only applies to LES data type). Computes with limited VGT tensor corresponding to stereo-PIV availability where dv/dx and dw/dx are unavailable, and du/dx is calculated from incompressible assumption."
     )
     
+    parser.add_argument(
+        "--plot-all", "-pa",
+        action="store_true",
+        help="Generate all plots including single-location plots and combined Q-R plots across locations."
+    )
+    
+    parser.add_argument(
+        "--locations", "-loc",
+        type=str,
+        nargs='+',
+        default=None,
+        help="List of locations for combined Q-R plotting (e.g., --locations 030_TE PIV1 PIV2 085_TE 095_TE PIV3). If not specified, default locations will be used based on data type."
+    )
+    
     return parser.parse_args()
 
 class VortexPlot:
@@ -92,6 +106,17 @@ class VortexPlot:
         self.pca_points = args.pca_points
         self.pca_length = args.pca_length
         self.limited_gradient = args.limited_gradient
+        self.plot_all = args.plot_all
+        self.locations = args.locations
+        
+        # Set default locations based on data type if not specified
+        if self.locations is None:
+            if self.data_type.upper() == 'LES':
+                self.locations = ['030_TE', 'PIV1', 'PIV2', '085_TE', '095_TE', 'PIV3']
+            elif self.data_type.upper() == 'PIV':
+                self.locations = ['PIV1', 'PIV2', 'PIV3']
+            else:
+                self.locations = ['030_TE', 'PIV1', 'PIV2', '085_TE', '095_TE', 'PIV3']
         
         # Create output directory
         self.output_dir = f'Velocity_Invariants_{self.location}_{self.data_type}'
@@ -443,6 +468,31 @@ class VortexPlot:
         
         print('    Plot generation complete.')
     
+    def generate_combined_plots(self):
+        """Generate combined Q-R plots across multiple locations."""
+        from .combine_qr_plot import generate_combined_qr_plots
+        
+        print('\n----> Generating combined Q-R plots...')
+        print(f'    Locations: {self.locations}')
+        print(f'    Data type: {self.data_type}')
+        
+        # Create output directory name with data type and limited gradient suffix
+        output_dir = f'QR_Plots_{self.data_type}'
+        if self.limited_gradient and self.data_type == 'LES':
+            output_dir += '_Limited'
+        
+        generate_combined_qr_plots(
+            locations=self.locations,
+            data_type=self.data_type,
+            velocity=self.velocity,
+            angle_of_attack=self.angle_of_attack,
+            bins=100,
+            output_dir=output_dir,
+            limited_gradient=self.limited_gradient
+        )
+        
+        print('    Combined Q-R plot generation complete.')
+    
     @timer
     def run(self):
         print(f"\n{'='*100}")
@@ -460,6 +510,8 @@ class VortexPlot:
         print(f'    Grid resolution: {self.grid_size} x {self.grid_size}')
         print(f'    PCA query points: {self.pca_points}')
         print(f'    PCA line length: {self.pca_length} m')
+        print(f'    Plot all: {self.plot_all}')
+        print(f'    Locations: {self.locations}')
         
         # Setup plotting parameters
         print('\n----> Setting up plotting parameters...')
@@ -467,11 +519,16 @@ class VortexPlot:
         print('    Matplotlib parameters configured.')
         
         # Main processing steps
-        self.load_data()
-        self.create_grid()
-        self.detect_vortices()
-        self.extract_invariants()
-        self.generate_plots()
+        if self.plot_all:
+            # Generate only combined plots across locations
+            self.generate_combined_plots()
+        else:
+            # Generate only single-location plots
+            self.load_data()
+            self.create_grid()
+            self.detect_vortices()
+            self.extract_invariants()
+            self.generate_plots()
         
         print(f"\n{'='*100}")
         print(f"{'Vortex plot analysis complete.':^100}")
