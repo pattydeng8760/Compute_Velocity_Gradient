@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
@@ -6,7 +7,7 @@ from scipy.ndimage import gaussian_filter
 from sklearn.decomposition import PCA
 from .utils import print
 
-def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points_SV, loc_points_aux, data_type):
+def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points_SV, loc_points_aux, data_type, limited_gradient=False):
     """
     Plot global velocity invariants on the interpolated grid.
     
@@ -158,11 +159,14 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
         for ax in axs.flatten():
             ax.imshow(~mask, extent=(-0.05/chord, 0.05/chord, -0.15, 0.15), 
                       alpha=0.5, cmap='gray', aspect='auto')
-    
-    plt.savefig(f'Velocity_Invariants_{location}_{data_type}/Global_Velocity_Invariants_{location}.png', dpi=300)
+    file_path = f'Velocity_Invariants_{location}_{data_type}'
+    if limited_gradient:
+        file_path += '_Limited'
+    fig_name = os.path.join(file_path, f'Global_Velocity_Invariants_{location}.png')
+    plt.savefig(fig_name, dpi=300)
     plt.close(fig)
 
-def plot_local_invariants_QR(location, R_hat, Q_hat, Vortex_Type: str, data_type):
+def plot_local_invariants_QR(location, R_hat, Q_hat, Vortex_Type: str, data_type, limited_gradient=False):
     """Plot local QR invariants in multi-panel subplot."""
     bins = 100
     num_points = int(np.shape(R_hat)[0])
@@ -226,10 +230,14 @@ def plot_local_invariants_QR(location, R_hat, Q_hat, Vortex_Type: str, data_type
         axs[i].tick_params(labelsize=12)
     
     fig.tight_layout()
-    plt.savefig(f'Velocity_Invariants_{location}_{data_type}/Local_Velocity_Invariants_QR_{location}_{Vortex_Type}.png', dpi=300)
+    file_path = f'Velocity_Invariants_{location}_{data_type}'
+    if limited_gradient:
+        file_path += '_Limited'
+    fig_name = os.path.join(file_path, f'Local_Velocity_Invariants_QR_{location}_{Vortex_Type}.png')
+    plt.savefig(fig_name, dpi=300)
     plt.close(fig)
 
-def plot_local_invariants_Qs_Rs(location, Rs_hat, Qs_hat, Vortex_Type: str, data_type):
+def plot_local_invariants_Qs_Rs(location, Rs_hat, Qs_hat, Vortex_Type: str, data_type, limited_gradient=False):
     """Plot local strain rate invariants."""
     bins = 100
     a_values = [-0.5, 0, 1/2, 1/3, 1]
@@ -295,10 +303,14 @@ def plot_local_invariants_Qs_Rs(location, Rs_hat, Qs_hat, Vortex_Type: str, data
         axs[i].tick_params(labelsize=12)
     
     fig.tight_layout()
-    plt.savefig(f'Velocity_Invariants_{location}_{data_type}/Local_Velocity_Invariants_Qs_Rs_{location}_{Vortex_Type}.png', dpi=300)
+    file_path = f'Velocity_Invariants_{location}_{data_type}'
+    if limited_gradient:
+        file_path += '_Limited'
+    fig_name = os.path.join(file_path, f'Local_Velocity_Invariants_Qs_Rs_{location}_{Vortex_Type}.png')
+    plt.savefig(fig_name, dpi=300)
     plt.close(fig)
 
-def plot_local_invariants_Qs_Qw(location, Qw_hat, Qs_hat, Vortex_Type: str, data_type):
+def plot_local_invariants_Qs_Qw(location, Qw_hat, Qs_hat, Vortex_Type: str, data_type, limited_gradient=False):
     """Plot local strain-vorticity invariants."""
     bins = 100
     num_points = int(np.shape(Qs_hat)[0])
@@ -363,12 +375,16 @@ def plot_local_invariants_Qs_Qw(location, Qw_hat, Qs_hat, Vortex_Type: str, data
         axs[i].tick_params(labelsize=12)
     
     fig.tight_layout()
-    plt.savefig(f'Velocity_Invariants_{location}_{data_type}/Local_Velocity_Invariants_Qs_Qw_{location}_{Vortex_Type}.png', dpi=300)
+    file_path = f'Velocity_Invariants_{location}_{data_type}'
+    if limited_gradient:
+        file_path += '_Limited'
+    fig_name = os.path.join(file_path, f'Local_Velocity_Invariants_Qs_Qw_{location}_{Vortex_Type}.png')
+    plt.savefig(fig_name, dpi=300)
     plt.close(fig)
 
 def plot_vortex_profiles(vortex_type, location, grid, connectivity, P_Vortex, S_Vortex,
                          Qhat_all, Rhat_all, Qs_all, Rs_all, Qw_all, var_S, 
-                         num_query_points: int = 100, L: float = 0.015, data_type: str = 'LES'):
+                         num_query_points: int = 100, L: float = 0.015, data_type: str = 'LES', limited_gradient=False):
     """
     Plot vortex profiles along the PCA axis for primary or secondary vortex.
     
@@ -534,5 +550,9 @@ def plot_vortex_profiles(vortex_type, location, grid, connectivity, P_Vortex, S_
     ax3.legend()
 
     plt.tight_layout()
-    plt.savefig(f'Velocity_Invariants_{location}_{data_type}/Local_Velocity_Invariants_PCA_{location}_{vortex_type}.png', dpi=300)
+    file_path = f'Velocity_Invariants_{location}_{data_type}'
+    if limited_gradient:
+        file_path += '_Limited'
+    fig_name = os.path.join(file_path, f'Local_Velocity_Invariants_PCA_{location}_{vortex_type}.png')
+    plt.savefig(fig_name, dpi=300)
     plt.close(fig)

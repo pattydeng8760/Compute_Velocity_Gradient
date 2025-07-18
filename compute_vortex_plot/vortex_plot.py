@@ -72,6 +72,12 @@ def parse_arguments():
         help="PCA line length (default: 0.012)."
     )
     
+    parser.add_argument(
+        "--limited-gradient", "-lg",
+        action="store_true",
+        help="Use limited gradient computation for LES data (only applies to LES data type). Computes with limited VGT tensor corresponding to stereo-PIV availability where dv/dx and dw/dx are unavailable, and du/dx is calculated from incompressible assumption."
+    )
+    
     return parser.parse_args()
 
 class VortexPlot:
@@ -85,9 +91,14 @@ class VortexPlot:
         self.grid_size = args.grid_size
         self.pca_points = args.pca_points
         self.pca_length = args.pca_length
+        self.limited_gradient = args.limited_gradient
         
         # Create output directory
         self.output_dir = f'Velocity_Invariants_{self.location}_{self.data_type}'
+        
+        if self.limited_gradient and self.data_type == 'LES':
+            self.output_dir += '_Limited'
+            print("Using limited gradient computation for LES data, the output directory is set to:", self.output_dir)
         os.makedirs(self.output_dir, exist_ok=True)
     
     def setup_rcparams(self):
@@ -109,9 +120,9 @@ class VortexPlot:
     
     def load_data(self):
         print('\n----> Loading velocity invariants data...')
-        self.data = load_velocity_invariants(self.location, self.data_type)
+        self.data = load_velocity_invariants(self.location, self.data_type, self.limited_gradient)
         print('----> Loading connectivity data...')
-        self.connectivity = load_connectivity(self.location, self.data_type)
+        self.connectivity = load_connectivity(self.location, self.data_type, self.limited_gradient)
         print('    Data loading complete.')
     
     def create_grid(self):
@@ -330,7 +341,7 @@ class VortexPlot:
             self.data, self.connectivity, self.P_Vortex, 
             location=self.location, Vortex_Type="PV",
             radius=0.01, n_layers=2, start_angle=0, end_angle=180,
-            data_type=self.data_type
+            data_type=self.data_type, limited_gradient=self.limited_gradient
         )
         
         # Extract invariants for secondary vortex
@@ -340,7 +351,7 @@ class VortexPlot:
             self.data, self.connectivity, self.S_Vortex, 
             location=self.location, Vortex_Type="SV",
             radius=0.007, n_layers=2, start_angle=-90, end_angle=90,
-            data_type=self.data_type
+            data_type=self.data_type, limited_gradient=self.limited_gradient
         )
         
         # Extract invariants for auxiliary vortices
@@ -354,7 +365,7 @@ class VortexPlot:
                 self.data, self.connectivity, self.T_Vortex, 
                 location=self.location, Vortex_Type="TV",
                 radius=0.007, n_layers=2, start_angle=0, end_angle=180,
-                data_type=self.data_type
+                data_type=self.data_type, limited_gradient=self.limited_gradient
             )
             self.loc_points_aux_coords.append(loc_points_TV[:, 0])
             aux_extracted += 1
@@ -368,7 +379,7 @@ class VortexPlot:
                 self.data, self.connectivity, self.SS_shear, 
                 location=self.location, Vortex_Type="SS_shear",
                 radius=shear_radius, n_layers=2, start_angle=-90, end_angle=90,
-                data_type=self.data_type
+                data_type=self.data_type, limited_gradient=self.limited_gradient
             )
             self.loc_points_aux_coords.append(loc_points_SS[:, 0])
             aux_extracted += 1
@@ -382,7 +393,7 @@ class VortexPlot:
                 self.data, self.connectivity, self.PS_shear, 
                 location=self.location, Vortex_Type="PS_shear",
                 radius=shear_radius, n_layers=2, start_angle=0, end_angle=180,
-                data_type=self.data_type
+                data_type=self.data_type, limited_gradient=self.limited_gradient
             )
             self.loc_points_aux_coords.append(loc_points_PS[:, 0])
             aux_extracted += 1
@@ -397,7 +408,7 @@ class VortexPlot:
         plot_global_invariants(
             self.data_grid, self.chord, self.location, 
             self.loc_points_PV, self.loc_points_SV, self.loc_points_aux_coords,
-            self.data_type
+            self.data_type, limited_gradient = self.limited_gradient
         )
         print('        Global invariant plots saved.')
         
@@ -416,7 +427,7 @@ class VortexPlot:
             Qs_all=self.data['Qs_all'], Rs_all=self.data['Rs_all'],
             Qw_all=self.data['Qw_all'], var_S=self.data['var_S'], 
             num_query_points=self.pca_points, L=self.pca_length, 
-            data_type=self.data_type
+            data_type=self.data_type, limited_gradient = self.limited_gradient
         )
         
         print(f'        Secondary vortex PCA profile (points: {self.pca_points}, length: {self.pca_length})...')
@@ -427,7 +438,7 @@ class VortexPlot:
             Qs_all=self.data['Qs_all'], Rs_all=self.data['Rs_all'],
             Qw_all=self.data['Qw_all'], var_S=self.data['var_S'], 
             num_query_points=self.pca_points, L=self.pca_length, 
-            data_type=self.data_type
+            data_type=self.data_type, limited_gradient = self.limited_gradient
         )
         
         print('    Plot generation complete.')

@@ -86,7 +86,7 @@ class VelocityInvariant:
         # Update output directory name to include _limited suffix if flag is set
         output_suffix = f"_{self.data_type}"
         if self.limited_gradient and self.data_type == 'LES':
-            output_suffix += "_limited"
+            output_suffix += "_Limited"
         self.output  = os.path.join(args.output_dir,f"Velocity_Invariants_{self.cut}{output_suffix}")
         if not os.path.exists(self.output):
             os.makedirs(self.output, exist_ok=True)
@@ -174,7 +174,7 @@ class VelocityInvariant:
             pqr_results = pool.starmap(compute_PQR_vectorized, blocks)
         save_output_main(
             node_count, node_indices, time_steps,
-            pqr_results, self.arr, self.output, velocity, self.cut
+            pqr_results, self.arr, self.output, velocity, self.cut, self.limited_gradient
         )
         del pqr_results
         
@@ -184,7 +184,7 @@ class VelocityInvariant:
             sqw_results = pool.starmap(compute_SQW_vectorized, blocks)
         save_output_strain(
             node_count, node_indices, time_steps,
-            sqw_results, self.arr, self.output, velocity, self.cut
+            sqw_results, self.arr, self.output, velocity, self.cut, self.limited_gradient
         )
         print(f"\n{'Velocity gradient invariants computation complete.':=^100}\n")
 

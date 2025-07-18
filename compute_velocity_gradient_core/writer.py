@@ -5,7 +5,7 @@ import numpy as np
 from antares import Reader, Writer
 
 
-def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
+def save_output_main(node,node_indices,time,results,arr,output,velocity,cut,limited_gradient=False):
     # Initialize arrays for final results
     P_final, Q_final, R_final = [np.zeros([node, time],dtype='float32') for _ in range(3)]
     strain_rate_final, pressure_hessian_final = [np.zeros([node, time],dtype='float32') for _ in range(2)]
@@ -20,7 +20,10 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
     print('\n----> Saving results...')
     #print('Saving mean PQR')
     # Saving the output mean PQR for visualization
-    filename = os.path.join(output,'Velocity_Invariants_' + cut + '_Mean')
+    filename = 'Velocity_Invariants_' + cut + '_Mean'
+    if limited_gradient:
+        filename += '_Limited'
+    filename = os.path.join(output,filename)
     r = Reader('hdf_antares')
     r['filename'] = arr[0]          # use the first file to get the base object and overwrite the file contents 
     b = r.read()  # b is the Base object of the Antares API
@@ -43,7 +46,10 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
     
     #print('Saving Full PQR')
     # Saving the full VGT result as h5 file
-    output_file = os.path.join(output, 'Velocity_Invariants_' + cut + '.h5')
+    filename = 'Velocity_Invariants_' + cut
+    if limited_gradient:
+        filename += '_Limited'
+    output_file = os.path.join(output, filename + '.h5')
     with h5py.File(output_file, 'w') as f:
         f.create_dataset('P', data=P_final, dtype='float32')
         f.create_dataset('Q', data=Q_final, dtype='float32')
@@ -60,7 +66,7 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut):
     print('    Full PQR saved to {0:s}.'.format(output_file))
     #print('\n---->File saving complete.')
 
-def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
+def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut,limited_gradient=False):
     # Initialize arrays for final results
     Qs,Rs,Qw = [np.zeros([node, time],dtype='float32') for _ in range(3)]
     var_A, var_S, var_Omega = [np.zeros([node],dtype='float32') for _ in range(3)]
@@ -76,7 +82,10 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     print('\n---->Saving results...')
     #print('Saving mean Qs, Rs, Qw')
     # Saving the output mean PQR for visualization
-    filename = os.path.join(output,'Velocity_Invariants_Rotation_Strain_' + cut + '_Mean')
+    filename = 'Velocity_Invariants_Rotation_Strain_' + cut + '_Mean'
+    if limited_gradient:
+        filename += '_Limited'
+    filename = os.path.join(output,filename)
     r = Reader('hdf_antares')
     r['filename'] = arr[0]
     b = r.read()  # b is the Base object of the Antares API
@@ -101,7 +110,10 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut):
     
     #print('Saving Full Qs, Rs, Qw')
     # Saving the full VGT result as h5 file
-    output_file = os.path.join(output, 'Velocity_Invariants_' + cut + '.h5')
+    filename = 'Velocity_Invariants_' + cut + '.h5'
+    if limited_gradient:
+        filename += '_Limited'
+    output_file = os.path.join(output, filename)
     with h5py.File(output_file, 'a') as f:
         f.create_dataset('Qs', data=Qs, dtype='float32')
         f.create_dataset('Rs', data=Rs, dtype='float32')

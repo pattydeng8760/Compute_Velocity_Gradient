@@ -3,10 +3,14 @@ import h5py
 import numpy as np
 from .utils import print
 
-def load_velocity_invariants(location, data_type='LES'):
+def load_velocity_invariants(location, data_type='LES', limited_gradient=False):
     """Load velocity invariants from HDF5 file."""
-    file_path = os.path.join(os.getcwd(), 'Velocity_Invariants_' + location + '_' + data_type,
-                             'Velocity_Invariants_' + location + '.h5')
+    parent_dir = 'Velocity_Invariants_' + location + '_' + data_type
+    file_name = 'Velocity_Invariants_' + location 
+    if limited_gradient:
+        parent_dir += '_Limited'
+        file_name += '_Limited'
+    file_path = os.path.join(os.getcwd(), parent_dir, file_name + '.h5')
     data = {}
     print("    Loading data from: {}".format(file_path))
     
@@ -46,10 +50,14 @@ def load_velocity_invariants(location, data_type='LES'):
     
     return data
 
-def load_connectivity(location, data_type='LES'):
+def load_connectivity(location, data_type='LES', limited_gradient=False):
     """Load connectivity matrix from HDF5 file."""
-    mesh_file = os.path.join(os.getcwd(), 'Velocity_Invariants_' + location + '_' + data_type,
-                             'Velocity_Invariants_' + location + '_Mean.h5')
+    parent_dir = 'Velocity_Invariants_' + location + '_' + data_type
+    file_name = 'Velocity_Invariants_' + location + '_Mean'
+    if limited_gradient:
+        parent_dir += '_Limited'
+        file_name += '_Limited'
+    mesh_file = os.path.join(os.getcwd(), parent_dir, file_name + '.h5')
     with h5py.File(mesh_file, 'r') as f:
         if data_type == 'PIV':
             # PIV data uses quadrilateral connectivity stored in instants/0000/connectivity/qua

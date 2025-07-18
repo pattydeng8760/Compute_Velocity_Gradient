@@ -32,7 +32,7 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
     
     output_suffix = data_type
     if limited_gradient and data_type == 'LES':
-        output_suffix += '_limited'
+        output_suffix += '_Limited'
     otuput_file_name = 'velocity_gradient_tensor_' + cut + '_' + output_suffix + '.h5'
     if os.path.exists(os.path.join(output,otuput_file_name)) and not reload:
         print('----> VGT already extracted.')

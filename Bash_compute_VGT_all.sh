@@ -18,7 +18,7 @@ NPROC=40
 NBLOCKS=1200
 
 # List your cuts here:
-CUTS=( "095_TE")
+CUTS=( "PIV3")
 
 for CUT in "${CUTS[@]}"; do
   echo "Processing cut: $CUT"
@@ -27,7 +27,8 @@ for CUT in "${CUTS[@]}"; do
     --parent-dir "$PARENT_DIR" \
     --nproc     "$NPROC" \
     --nblocks   "$NBLOCKS" \
-    --output-dir "./"   # optional: per-cut subfolder
+    --output-dir "./" \
+    --limited-gradient
   echo
 done
 
