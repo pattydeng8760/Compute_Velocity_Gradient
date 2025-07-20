@@ -18,7 +18,8 @@ Main Components:
 Usage:
     python -m compute_vortex_plot --cut PIV1 --data-type LES
 """
-
+import sys
+sys.path.insert(0, "/project/p/plavoie/denggua1/Coordinates")
 from .vortex_plot import VortexPlot, parse_arguments
 from .utils import init_logging_from_cut, timer, print
 

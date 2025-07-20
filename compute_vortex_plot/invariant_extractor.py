@@ -73,7 +73,7 @@ def find_closest_indices_and_adjacent_cells(core_loc, grid, connectivity, n=6, r
     
     return loc_points, closest_indices, adjacent_points_list
 
-def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_list, data_type='LES'):
+def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_list, data_type):
     """
     Extract and stack variable data from core and adjacent cells.
     
@@ -114,7 +114,7 @@ def extract_variable_data_stacked(variable_all, core_indices, adjacent_points_li
     
     return np.vstack(stacked_list)
 
-def extract_mean_variable(variable_all, core_indices, adjacent_points_list, data_type='LES'):
+def extract_mean_variable(variable_all, core_indices, adjacent_points_list, data_type):
     """
     Extract mean variable values from core and adjacent cells.
     

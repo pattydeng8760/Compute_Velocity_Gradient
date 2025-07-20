@@ -260,15 +260,16 @@ class VortexPlot:
             print(f'    LES window boundaries loaded for location: {self.location}')
         
         mean_vort_x = np.mean(self.data['vort_x'], axis=1)
+        mean_Q = np.mean(np.nan_to_num(self.data['Qhat_all'], nan=0.0), axis=1)
         mean_u = np.mean(self.data['u'], axis=1)
         
         # Adjust detection parameters for PIV data
         if self.data_type == 'PIV':
             # PIV data typically has different vorticity levels and velocity thresholds
-            primary_level = -5  # Much less strict for PIV data
-            secondary_level = -5
-            tertiary_level = -2
-            shear_level = -0.1  # Extremely relaxed for PIV shear vortices (based on debug data)
+            primary_level = -20  # Much less strict for PIV data
+            secondary_level = -20
+            tertiary_level = -20
+            shear_level = -15 
             primary_method = 'max'  # Max method works better for PIV
             secondary_method = 'max'
         else:
@@ -301,8 +302,8 @@ class VortexPlot:
         self.S_Vortex = vortex_detector(
             'Secondary', boundaries['SV_WindowLL'], boundaries['SV_WindowUR'],
             self.data['y'], self.data['z'], mean_u, 
-            mean_vort_x * self.chord / self.velocity, 
-            choice=secondary_method, level=secondary_level
+            -mean_Q, 
+            choice=secondary_method, level=-0.2
         )
         print(f'        Secondary vortex core: {self.S_Vortex.core.core_loc[0]}')
         

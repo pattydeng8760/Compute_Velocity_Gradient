@@ -35,6 +35,8 @@ Usage:
 """
 
 # Main classes and functions
+import sys
+sys.path.insert(0, "/project/p/plavoie/denggua1/Coordinates")
 from .vortex_detect import VortexDetect, parse_arguments, main
 from .vortex_track import vortex, vortex_trace, find_squares
 from .make_grid import make_grid

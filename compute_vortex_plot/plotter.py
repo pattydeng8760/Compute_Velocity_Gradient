@@ -168,7 +168,7 @@ def plot_global_invariants(data_grid, chord, location, loc_points_PV, loc_points
 
 def plot_local_invariants_QR(location, R_hat, Q_hat, Vortex_Type: str, data_type, limited_gradient=False):
     """Plot local QR invariants in multi-panel subplot."""
-    bins = 100
+    bins = 120
     num_points = int(np.shape(R_hat)[0])
     fig, axs = plt.subplots(int(num_points/2), 2, figsize=(int(num_points/2)*3+1, 8))
     axs = axs.flatten()

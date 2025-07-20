@@ -13,7 +13,7 @@ from compute_vortex_detect_core.utils import init_logging_from_cut
 
 config = {
     "data_type"      : "PIV",
-    "cut"            : "PIV1",
+    "cut"            : "PIV2",
     "parent_dir"     : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data",
     "output_dir"     : ".",
     "nproc"          : 20,

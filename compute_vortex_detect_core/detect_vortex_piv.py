@@ -81,7 +81,7 @@ def process_file_block_piv(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV
             v = base['0000']['0000']['v']  # Span velocity
             w = base['0000']['0000']['w']  # Streamwise velocity
             l2 = base['0000']['0000']['lambda2']*(0.3048**2)/(30**2)  # lambda 2 criterion
-            
+            Q = base['0000']['0000']['Q']*(0.3048**2)/(30**2) # Q criterion
             if x is None and y is None:
                 x = x_file
                 y = y_file
@@ -90,7 +90,12 @@ def process_file_block_piv(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV
                 if not (np.array_equal(x, x_file) and np.array_equal(y, y_file)):
                     print(f"Block {block_num}: PIV coordinates differ in file {file_path}. Using the first file's coordinates.")
             
-            var_data = vort_x if var == 'vort_x' else l2
+            if var == 'vort_x':
+                var_data = vort_x
+            elif var == 'lambda2':
+                var_data = l2
+            elif var == 'Q':
+                var_data = -Q    
             
             # Initialize vortex objects with PIV coordinates
             # Note: For PIV, we pass x,y coordinates and w velocity (streamwise) for detection
@@ -309,7 +314,7 @@ class vortex_piv:
                     self.core_mag = [np.nan]
 
 
-def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='precise', nb_tasks=None, max_file=None, output_dir='./'):
+def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='area', nb_tasks=None, max_file=None, output_dir='./'):
     """
     Detect vortices from PIV data using parallel processing.
     

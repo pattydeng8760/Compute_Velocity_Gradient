@@ -38,7 +38,31 @@ def compute_PQR_vectorized(images_part, block_num):
     # then average over time (axis=1) gives var_A of shape (node_count,).
     A_fluc_sq = np.sum(A_fluc**2, axis=(0, 1))  # shape: (node_count, time_int)
     var_A = np.mean(A_fluc_sq, axis=1)  # shape: (node_count,)
+    # Alternate
+    # A_reshaped = A_fluc.transpose(2, 3, 0, 1)  # (node_count, time_int, 3, 3)
+    # AA_T = np.einsum('ntik,ntjk->ntij', A_reshaped, A_reshaped)  # A @ A.T
+    # trace_AA_T = np.einsum('ntii->nt', AA_T)  # trace
+    # var_A = np.mean(trace_AA_T, axis=1)  # average over time
 
+    # var_A = np.zeros(node_count)  # Initialize
+
+    # for n in range(node_count):
+    #     # Extract fluctuation tensor for this node across all time: shape (3, 3, time_int)
+    #     A_fluc_node = A_fluc[:, :, n, :]  # shape: (3, 3, time_int)
+        
+    #     # For each time step, compute (A_fluc * A_fluc^T) and take trace
+    #     varAtemp = np.zeros(time_int)
+        
+    #     for t in range(time_int):
+    #         A_fluc_t = A_fluc_node[:, :, t]  # shape: (3, 3)
+    #         # Compute (A_fluc * A_fluc^T)
+    #         A_fluc_AT = A_fluc_t @ A_fluc_t.T  # shape: (3, 3)
+    #         # Take trace: sum of diagonal elements
+    #         varAtemp[t] = np.trace(A_fluc_AT)  # = A_fluc_AT[0,0] + A_fluc_AT[1,1] + A_fluc_AT[2,2]
+        
+    #     # Average over time (exactly like MATLAB)
+    #     var_A[n] = np.mean(varAtemp)
+    
     # --- Compute P_hat ---
     # Trace of A: sum of diagonal elements. Since images_part has shape (3,3,node_count,time_int),
     # each diagonal (e.g. images_part[0,0,:,:]) is of shape (node_count, time_int).
@@ -51,9 +75,16 @@ def compute_PQR_vectorized(images_part, block_num):
     # To compute trace(A @ A), note that:
     #   trace(A @ A) = sum_ij A[i,j]*A[j,i].
     # We can compute this by taking elementwise product of images_part and its transpose (swapaxes 0 and 1).
-    trace_AA = np.sum(images_part * images_part.swapaxes(0, 1), axis=(0, 1))  # shape: (node_count, time_int)
+    #trace_AA = np.sum(images_part * images_part.swapaxes(0, 1), axis=(0, 1))  # shape: (node_count, time_int)
+    trace_AA = np.einsum('ijmn,jimn->mn', images_part, images_part)
     # Use broadcasting for var_A (shape (node_count,) -> (node_count, time_int))
-    Q_hat = 0.5 * (trace_A**2 - trace_AA) / var_A[:, None]
+    #Q_hat = 0.5 * (trace_A**2 - trace_AA) / var_A[:, None]
+    
+    trace_mean_A = mean_A[0, 0, :] + mean_A[1, 1, :] + mean_A[2, 2, :]
+
+    # Use the trace of the MEAN tensor instead of the instantaneous trace.
+    # Note the use of [:, None] to allow broadcasting.
+    Q_hat = 0.5 * ((trace_mean_A[:, None])**2 - trace_AA) / var_A[:, None]
 
     # --- Compute R_hat ---
     # R_hat = -det(A)/var_A^(1.5)
@@ -229,4 +260,4 @@ def compute_PQR(images_part, block_num):
         vort_x_part[node_idx, :] = vort_x_mag
         strain_rate_part[node_idx, :] = strain_rate_mag
         pressure_hessian_part[node_idx, :] = pressure_hessian_mag
-    return P_hat_part, Q_hat_part, R_hat_part, vort_part, vort_x_part, strain_rate_part, pressure_hessian_part, block_num
+    return P_hat_part, Q_hat_part, R_hat_part, strain_rate_part, pressure_hessian_part, block_num
