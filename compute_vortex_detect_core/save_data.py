@@ -25,7 +25,7 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
         T_core_loc (numpy.ndarray): Tertiary vortex core locations [N_timesteps, 2]
         T_Vort_Diff (vortex_trace): Tertiary vortex wandering statistics object
         dir (str): Output directory path for saving files
-        tertiary (bool, optional): Whether tertiary vortex data exists. Defaults to False.
+        tertiary (bool, optional): Whether tertiary vortex data is included
     
     Saves:
         Grid data (numpy format):
@@ -68,7 +68,7 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
         # Save the data as matlab fil
         scipy.io.savemat(os.path.join(dir, f'Grid_{cut}_Data.mat'), 
                         {'grid_y': vars.grid_y/chord, 'grid_z': vars.grid_z/ chord, 'grid_vort': vars.grid_vort, 'grid_u': vars.grid_u ,'grid_v': vars.grid_v, 'grid_w': vars.grid_w})
-        if tertiary== False:
+        if cut != 'PIV3':
             np.save(os.path.join(dir, f'Grid_mask_index_{cut}'), vars.mask_indx)
         P_core_loc[:,0] = P_core_loc[:,0]/chord
         P_core_loc[:,1] = P_core_loc[:,1]/chord
@@ -84,7 +84,7 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
         # Save the data as matlab file
         scipy.io.savemat(os.path.join(dir, f'Grid_{cut}_Data.mat'), 
                         {'grid_y': vars.grid_y/chord, 'grid_z': vars.grid_z/ chord + 0.1034/chord, 'grid_vort': vars.grid_vort, 'grid_u': vars.grid_u ,'grid_v': vars.grid_v, 'grid_w': vars.grid_w})
-        if tertiary== False:
+        if cut != 'PIV3':
             np.save(os.path.join(dir, f'Grid_mask_index_{cut}'), vars.mask_indx)
         P_core_loc[:,0] = P_core_loc[:,0]/chord
         P_core_loc[:,1] = P_core_loc[:,1]/chord + 0.1034/chord

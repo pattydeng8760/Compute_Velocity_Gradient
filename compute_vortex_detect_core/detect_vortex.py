@@ -314,6 +314,6 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
     # Saving data
     print('\n----> Saving Results:')
     print(f'    Saving processed data to: {output_dir}')
-    save_data(Vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, output_dir, tertiary)
+    save_data(Vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, output_dir, tertiary, data_type='LES')
     print('    Data saved successfully')
     return S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars

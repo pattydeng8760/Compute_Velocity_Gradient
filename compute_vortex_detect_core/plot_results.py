@@ -225,9 +225,13 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     
     # Add streamlines - handle PIV data differently due to grid irregularities
     try:
+        if data_type == "PIV":
         # For LES data, use normal streamlines
-        plt.streamplot(y, z, v, w, 
-                        color='k', linewidth=1.5, arrowsize=1, density=2)
+            plt.streamplot(y, z, np.flip(v), np.flip(w),
+                color='k', linewidth=1.5, arrowsize=1, density=2)
+        elif data_type == "LES":
+            plt.streamplot(y, z, v, w,
+                color='k', linewidth=1.5, arrowsize=1, density=2)
     except Exception as e:
         print(f"    Warning: Could not create streamlines for {data_type} data: {e}")
         print("    Continuing without streamlines...")
@@ -326,11 +330,11 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     plt.close()
     
     # Extract PCA line data and save to HDF5 (commented out - obsolete)
-    # filename = os.path.join(output_dir, f'Velocity_Core_B_10AOA_{data_type}_U30.h5')
-    # extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
-    # extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
-    # if tertiary and len(T_core_loc) > 0:
-    #     extract_pca_line(T_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'TV')
+    filename = os.path.join(output_dir, f'Velocity_Core_B_10AOA_{data_type}_U30.h5')
+    extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
+    extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
+    if tertiary and len(T_core_loc) > 0:
+        extract_pca_line(T_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'TV')
 
 def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.3048):
     """

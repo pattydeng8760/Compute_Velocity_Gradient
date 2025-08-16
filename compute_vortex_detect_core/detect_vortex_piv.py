@@ -526,8 +526,15 @@ def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='a
             
             # PIV airfoil mask using same logic as LES method
             # Apply airfoil masking: identify regions where |u| < 1e-3 (near-zero velocity)
-            index_airf = np.where(np.abs(u_2d) < 1e-5)
-            
+            index_airf = np.where(
+                (np.abs(u_2d) < 1e-5) & 
+                (np.abs(v_2d) < 1e-5) & 
+                (np.abs(w_2d) < 1e-5) & 
+                (np.abs(vort_2d) < 1e-5) &
+                (np.arange(ny)[:, None] >= 3) & (np.arange(ny)[:, None] < ny - 3) &
+                (np.arange(nz)[None, :] >= 3) & (np.arange(nz)[None, :] < nz - 3)
+            )
+                        
             # Create copies of 2D grids for masking
             grid_u_masked = u_2d.copy()
             grid_v_masked = v_2d.copy()  
@@ -587,7 +594,7 @@ def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='a
     # Saving data using existing save_data function
     print('\n----> Saving PIV Results:')
     print(f'    Saving processed PIV data to: {output_dir}')
-    save_data(Vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, output_dir, tertiary)
+    save_data(Vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_core_loc, T_Vort_Diff, output_dir, tertiary, data_type='LES')
     print('    PIV data saved successfully')
     
     return S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars
