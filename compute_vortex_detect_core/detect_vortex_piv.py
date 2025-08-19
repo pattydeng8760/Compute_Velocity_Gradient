@@ -349,7 +349,7 @@ def detect_vortex_piv(source_dir, cut, alpha, var='vort_x', level=-20, method='a
     
     # Get PIV window boundaries for the given cut location
     try:
-        window_boundaries = get_window_boundaries_PIVs(cut, str(alpha))
+        window_boundaries = get_window_boundaries_PIV(cut, str(alpha))
         piv_windows = window_boundaries[str(alpha)][cut]
     except (KeyError, ValueError) as e:
         print(f"PIV window boundaries not found for cut {cut} at alpha {alpha}: {e}")
