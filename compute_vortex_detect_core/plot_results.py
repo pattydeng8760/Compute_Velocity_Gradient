@@ -328,7 +328,6 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     plt.savefig(os.path.join(output_dir, colorbar_filename + '.jpeg'), format='jpeg', dpi=600, 
                 bbox_inches='tight', pad_inches=0.2)
     plt.close()
-    
     # Extract PCA line data and save to HDF5 (commented out - obsolete)
     filename = os.path.join(output_dir, f'Velocity_Core_B_10AOA_{data_type}_U30.h5')
     extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
