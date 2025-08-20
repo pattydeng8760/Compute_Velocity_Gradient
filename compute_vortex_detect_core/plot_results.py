@@ -91,7 +91,7 @@ def plot_pca_axis(core_locs, color='black', label="PCA Axis", scale=2):
     plt.annotate('', xy=end_point, xytext=mean, arrowprops=dict(arrowstyle='-|>', color=color, lw=1.5))
     plt.annotate('', xy=start_point, xytext=mean, arrowprops=dict(arrowstyle='-|>', color=color, lw=1.5))
 
-def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex, num_points=500):
+def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex, num_points=800):
     """
     Extracts velocity and vorticity values along the principal axis of the given core locations.
     """
@@ -101,13 +101,15 @@ def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex,
     direction = pca.components_[0]
     
     # Scale the line for visualization
-    length = np.max(np.linalg.norm(core_locs - mean, axis=1)) * 4  # Extend beyond data
+    length = np.max(np.linalg.norm(core_locs - mean, axis=1)) * 5  # Extend beyond data
     
     # Generate points along the PCA line
     t = np.linspace(-length, length, num_points)
     line_points = mean + t[:, None] * direction
     
     # Interpolate data along this line
+    x_line = griddata((y.ravel(), z.ravel()), y.ravel(), (line_points[:, 0], line_points[:, 1]), method='linear')
+    y_line = griddata((y.ravel(), z.ravel()), z.ravel(), (line_points[:, 0], line_points[:, 1]), method='linear')
     u_line = griddata((y.ravel(), z.ravel()), u.ravel(), (line_points[:, 0], line_points[:, 1]), method='linear')
     v_line = griddata((y.ravel(), z.ravel()), v.ravel(), (line_points[:, 0], line_points[:, 1]), method='linear')
     w_line = griddata((y.ravel(), z.ravel()), w.ravel(), (line_points[:, 0], line_points[:, 1]), method='linear')
@@ -119,11 +121,16 @@ def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex,
         if vortex not in f[location]:
             f[location].create_group(vortex)
         
-        for name, data in zip(['x', 'u', 'v', 'w', 'vort'], [t, u_line, v_line, w_line, vort_line]):
+        for name, data in zip(['y','z','r', 'u', 'v', 'w', 'vort'], [x_line, y_line, t, u_line, v_line, w_line, vort_line]):
             if name in f[location][vortex]:
                 del f[location][vortex][name]
             f[location][vortex].create_dataset(name, data=data)
-    
+        f[location][vortex].create_dataset('core_loc', data=core_locs)
+        f[location][vortex].create_dataset('direction', data=direction)
+        f[location][vortex].attrs['mean_core_loc'] = mean.tolist()  # Store mean as list
+        f[location][vortex].attrs['num_points'] = num_points
+        f[location][vortex].attrs['scale'] = length
+    print(f'    Extracted PCA line at {location} for {vortex}.')
     return t, u_line, v_line, w_line, vort_line
 
 def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
