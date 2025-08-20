@@ -192,7 +192,7 @@ def detect_vortex(source_dir, cut, alpha, method='area', nb_tasks=None, max_file
     try:
         window_boundaries = get_window_boundaries(cut, str(alpha))
     except ValueError as e:
-        print(str(e))
+        print(f"PIV window boundaries not found for cut {cut} at alpha {alpha}: {e}")
         raise
     
     SV_WindowLL = window_boundaries['SV_WindowLL']
