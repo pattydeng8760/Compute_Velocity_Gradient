@@ -310,7 +310,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     fig.tight_layout()
     
     # Save the main plot
-    figname = f'B_10AOA_{data_type}_{cut_loc}_Vort_Cores'
+    figname = f'{data_type}_{cut_loc}_Vort_Cores'
     plt.savefig(os.path.join(output_dir, figname + '.eps'), format='eps', dpi=600)
     plt.savefig(os.path.join(output_dir, figname + '.jpeg'), format='jpeg', dpi=600)
     plt.close()
@@ -323,7 +323,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     cb.ax.tick_params(labelsize=12)
     cb.set_label(r'$\omega c/U_{\infty}$', rotation=90)
     
-    colorbar_filename = f'B_10AOA_{data_type}_{cut_loc}_Vort_Cores_colorbar'
+    colorbar_filename = f'{data_type}_{cut_loc}_Vort_Cores_colorbar'
     fig_cb.tight_layout()
     plt.savefig(os.path.join(output_dir, colorbar_filename + '.eps'), format='eps', dpi=600, 
                 bbox_inches='tight', pad_inches=0.2)
@@ -331,7 +331,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
                 bbox_inches='tight', pad_inches=0.2)
     plt.close()
     # Extract PCA line data and save to HDF5 (commented out - obsolete)
-    filename = os.path.join('./', f'Velocity_Core_B_10AOA_U30_{data_type}.h5')
+    filename = os.path.join('./', f'Velocity_Core_{data_type}.h5')
     extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
     extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
     if tertiary and len(T_core_loc) > 0:
@@ -449,7 +449,7 @@ def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.
     fig.tight_layout()
     
     # Save the plot
-    figname = f'B_10AOA_{data_type}_{cut_loc}_Vort_Prob'
+    figname = f'{data_type}_{cut_loc}_Vort_Prob'
     plt.savefig(os.path.join(output_dir, figname + '.eps'), format='eps', dpi=600)
     plt.savefig(os.path.join(output_dir, figname + '.jpeg'), format='jpeg', dpi=600)
     plt.close()
