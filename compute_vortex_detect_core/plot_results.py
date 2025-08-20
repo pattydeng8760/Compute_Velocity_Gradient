@@ -225,13 +225,8 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     
     # Add streamlines - handle PIV data differently due to grid irregularities
     try:
-        if data_type == "PIV":
-        # For LES data, use normal streamlines
-            plt.streamplot(y, z, np.flip(v), np.flip(w),
-                color='k', linewidth=1.5, arrowsize=1, density=2)
-        elif data_type == "LES":
-            plt.streamplot(y, z, v, w,
-                color='k', linewidth=1.5, arrowsize=1, density=2)
+        plt.streamplot(y, z, v, w,
+            color='k', linewidth=1.5, arrowsize=1, density=2)
     except Exception as e:
         print(f"    Warning: Could not create streamlines for {data_type} data: {e}")
         print("    Continuing without streamlines...")
