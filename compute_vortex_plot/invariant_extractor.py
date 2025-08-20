@@ -156,7 +156,8 @@ def extract_mean_variable(variable_all, core_indices, adjacent_points_list, data
 
 def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vortex_Type: str, 
                                radius=0.01, n=6, n_layers=2, start_angle=0, end_angle=180, 
-                               data_type: str = 'LES', limited_gradient: bool = False):
+                               data_type: str = 'LES', velocity:int=30, angle_of_attack:int=10,
+                               limited_gradient: bool = False):
     """
     Extract velocity invariants at vortex core and adjacent cells.
     
@@ -228,6 +229,6 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     plot_local_invariants_Qs_Qw(location, Qw, Qs, Vortex_Type, data_type, limited_gradient = limited_gradient)
     
     # Save extracted data
-    save_extracted_data(location, Phat, Qhat, Rhat, Qs, Qw, Rs, Vortex_Type, data_type)
+    save_extracted_data(location, Phat, Qhat, Rhat, Qs, Qw, Rs, Vortex_Type, data_type, velocity, angle_of_attack, limited_gradient)
     
     return loc_points

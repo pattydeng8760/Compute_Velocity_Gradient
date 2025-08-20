@@ -269,7 +269,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     label_tertiary = "Tertiary \nVortex"
     
     P_core_loc_scaled = scale_points(P_core_loc, 0.7)
-    S_core_loc_scaled = scale_points(S_core_loc, 0.7)
+    S_core_loc_scaled = scale_points(S_core_loc, 1)
     if tertiary and len(T_core_loc) > 0:
         T_core_loc_scaled = scale_points(T_core_loc, 0.5)
     
@@ -330,8 +330,8 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     plt.savefig(os.path.join(output_dir, colorbar_filename + '.jpeg'), format='jpeg', dpi=600, 
                 bbox_inches='tight', pad_inches=0.2)
     plt.close()
-    # Extract PCA line data and save to HDF5 (commented out - obsolete)
-    filename = os.path.join('./', f'Velocity_Core_{data_type}.h5')
+    # Extract PCA line data and save to HDF5
+    filename = os.path.join(f'Velocity_Core_B_10AOA_U30_{data_type}.h5')
     extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
     extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
     if tertiary and len(T_core_loc) > 0:

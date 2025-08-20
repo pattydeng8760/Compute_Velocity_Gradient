@@ -1,6 +1,6 @@
 import h5py
-
-def save_extracted_data(location, P_hat, Q_hat, R_hat, Qs_hat, Qw_hat, Rs_hat, Vortex_Type, data_type='LES'):
+from .combine_qr_plot import get_data_file_path
+def save_extracted_data(location, P_hat, Q_hat, R_hat, Qs_hat, Qw_hat, Rs_hat, Vortex_Type, data_type='LES', velocity=30, angle_of_attack=10, limited_gradient=False):
     """
     Save extracted velocity invariant data to HDF5 file.
     
@@ -25,11 +25,8 @@ def save_extracted_data(location, P_hat, Q_hat, R_hat, Qs_hat, Qw_hat, Rs_hat, V
     data_type : str
         Data type ('LES' or 'PIV')
     """
-    # Use different filename based on data type
-    if data_type == 'PIV':
-        filename = 'Velocity_Invariants_Core_B_10AOA_PIV_U30.h5'
-    else:
-        filename = 'Velocity_Invariants_Core_B_10AOA_LES_U30.h5'
+
+    filename = get_data_file_path(data_type, velocity=velocity, angle_of_attack=angle_of_attack, limited_gradient=limited_gradient, check_exists=False)
     
     with h5py.File(filename, 'a') as f:
         # Ensure the location group exists

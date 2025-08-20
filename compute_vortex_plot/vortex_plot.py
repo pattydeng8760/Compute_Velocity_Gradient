@@ -302,8 +302,8 @@ class VortexPlot:
         self.S_Vortex = vortex_detector(
             'Secondary', boundaries['SV_WindowLL'], boundaries['SV_WindowUR'],
             self.data['y'], self.data['z'], mean_u, 
-            -mean_Q, 
-            choice=secondary_method, level=-0.2
+            mean_vort_x * self.chord / self.velocity, 
+            choice=secondary_method, level=secondary_level
         )
         print(f'        Secondary vortex core: {self.S_Vortex.core.core_loc[0]}')
         
@@ -367,7 +367,8 @@ class VortexPlot:
             self.data, self.connectivity, self.P_Vortex, 
             location=self.location, Vortex_Type="PV",
             radius=0.01, n_layers=2, start_angle=0, end_angle=180,
-            data_type=self.data_type, limited_gradient=self.limited_gradient
+            data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
+            limited_gradient=self.limited_gradient
         )
         
         # Extract invariants for secondary vortex
@@ -376,8 +377,9 @@ class VortexPlot:
         self.loc_points_SV = extract_velocity_invariants(
             self.data, self.connectivity, self.S_Vortex, 
             location=self.location, Vortex_Type="SV",
-            radius=0.007, n_layers=2, start_angle=-90, end_angle=90,
-            data_type=self.data_type, limited_gradient=self.limited_gradient
+            radius=0.002, n_layers=1, start_angle=-90, end_angle=90,
+            data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
+            limited_gradient=self.limited_gradient
         )
         
         # Extract invariants for auxiliary vortices
@@ -391,7 +393,8 @@ class VortexPlot:
                 self.data, self.connectivity, self.T_Vortex, 
                 location=self.location, Vortex_Type="TV",
                 radius=0.007, n_layers=2, start_angle=0, end_angle=180,
-                data_type=self.data_type, limited_gradient=self.limited_gradient
+                data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
+                limited_gradient=self.limited_gradient
             )
             self.loc_points_aux_coords.append(loc_points_TV[:, 0])
             aux_extracted += 1
@@ -405,7 +408,8 @@ class VortexPlot:
                 self.data, self.connectivity, self.SS_shear, 
                 location=self.location, Vortex_Type="SS_shear",
                 radius=shear_radius, n_layers=2, start_angle=-90, end_angle=90,
-                data_type=self.data_type, limited_gradient=self.limited_gradient
+                data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
+                limited_gradient=self.limited_gradient
             )
             self.loc_points_aux_coords.append(loc_points_SS[:, 0])
             aux_extracted += 1
@@ -419,7 +423,8 @@ class VortexPlot:
                 self.data, self.connectivity, self.PS_shear, 
                 location=self.location, Vortex_Type="PS_shear",
                 radius=shear_radius, n_layers=2, start_angle=0, end_angle=180,
-                data_type=self.data_type, limited_gradient=self.limited_gradient
+                data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
+                limited_gradient=self.limited_gradient
             )
             self.loc_points_aux_coords.append(loc_points_PS[:, 0])
             aux_extracted += 1

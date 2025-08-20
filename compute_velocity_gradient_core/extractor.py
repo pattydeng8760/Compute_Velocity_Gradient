@@ -76,7 +76,7 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
                 gradients[i][:, idx] = b[0][0][key]
         
         # Apply limited gradient modification for LES data if requested
-        if limited_gradient and data_type == 'LES':
+        if (limited_gradient and data_type == 'LES') or data_type == 'PIV':
             print('    Applying limited gradient computation for stereo-PIV compatibility...')
             # Set dv/dx (index 3) and dw/dx (index 6) to zero
             gradients[3][:, :] = 0.0  # grad_v_x = dv/dx = 0

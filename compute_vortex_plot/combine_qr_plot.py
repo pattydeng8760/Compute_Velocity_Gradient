@@ -31,22 +31,22 @@ def setup_plot_params():
     })
 
 
-def get_data_file_path(data_type, velocity=30, angle_of_attack=10, limited_gradient=False):
+def get_data_file_path(data_type, velocity=30, angle_of_attack=10, limited_gradient=False, check_exists:bool = True):
     """Get the appropriate data file path based on data type and limited_gradient option."""
     base_path = os.getcwd()
     if data_type.upper() == 'LES':
-        data_path = f'Velocity_Invariants_Core_B_{angle_of_attack}AOA_LES_U{velocity}.h5'
+        data_path = f'Velocity_Invariants_Core_B_{angle_of_attack}AOA_U{velocity}_LES.h5'
         if limited_gradient:
             data_path = data_path.replace('.h5', '_Limited.h5')
     elif data_type.upper() == 'PIV':
-        data_path = f'Velocity_Invariants_Core_B_{angle_of_attack}AOA_PIV_U{velocity}.h5'
+        data_path = f'Velocity_Invariants_Core_B_{angle_of_attack}AOA_U{velocity}_PIV.h5'
     else:
         raise ValueError(f"Invalid data_type: {data_type}. Must be 'LES' or 'PIV'.")
     
     data_file = os.path.join(base_path, data_path)
-    
-    if not os.path.exists(data_file):
-        raise FileNotFoundError(f"Data file not found: {data_file}")
+    if check_exists:
+        if not os.path.exists(data_file):
+            raise FileNotFoundError(f"Data file not found: {data_file}")
     
     return data_file
 
@@ -282,7 +282,7 @@ def plot_QsQw_along_vortex(qs, qw, bins=100, set_lim=None, vortex_group='PV', ou
         # Normalize and apply Gaussian filter
         if np.max(pdf) > 0:
             pdf_norm = pdf / np.max(pdf)
-            pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
+            pdf_norm = gaussian_filter(pdf_norm, sigma=[1.5, 1.5])
             
             # Plot contours
             color_map = plt.cm.hot.reversed()

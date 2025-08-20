@@ -80,7 +80,7 @@ def process_file_block_piv(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV
             u = base['0000']['0000']['u']  # Wall-normal velocity
             v = base['0000']['0000']['v']  # Span velocity
             w = base['0000']['0000']['w']  # Streamwise velocity
-            l2 = base['0000']['0000']['lambda2']*(0.3048**2)/(30**2)  # lambda 2 criterion
+            #l2 = base['0000']['0000']['lambda2']*(0.3048**2)/(30**2)  # lambda 2 criterion
             Q = base['0000']['0000']['Q']*(0.3048**2)/(30**2) # Q criterion
             if x is None and y is None:
                 x = x_file

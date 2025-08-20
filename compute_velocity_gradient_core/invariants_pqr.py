@@ -85,7 +85,20 @@ def compute_PQR_vectorized(images_part, block_num):
     # Use the trace of the MEAN tensor instead of the instantaneous trace.
     # Note the use of [:, None] to allow broadcasting.
     Q_hat = 0.5 * ((trace_mean_A[:, None])**2 - trace_AA) / var_A[:, None]
-
+    # ux = images_part[0, 0, :, :] 
+    # uy = images_part[0, 1, :, :]
+    # uz = images_part[0, 2, :, :]
+    # vx = images_part[1, 0, :, :]
+    # vy = images_part[1, 1, :, :]
+    # vz = images_part[1, 2, :, :]
+    # wx = images_part[2, 0, :, :]
+    # wy = images_part[2, 1, :, :]
+    # wz = images_part[2, 2, :, :]
+    
+    
+    # Q_hat = (0.5 * ( ((uy - vx)**2 + (uz - wx)**2 + (vz - wy)**2)
+    # - (ux**2 + vy**2 + wz**2 + 0.5 * (uy + vx)**2 + 0.5 * (uz + wx)**2 + 0.5 * (vz + wy)**2)))/ var_A[:, None]
+    
     # --- Compute R_hat ---
     # R_hat = -det(A)/var_A^(1.5)
     # To compute determinants vectorized, first reshape so that the last two axes are the 3x3 matrices.

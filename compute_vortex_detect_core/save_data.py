@@ -26,6 +26,7 @@ def save_data(vars, cut, P_core_loc, P_Vort_Diff, S_core_loc, S_Vort_Diff, T_cor
         T_Vort_Diff (vortex_trace): Tertiary vortex wandering statistics object
         dir (str): Output directory path for saving files
         tertiary (bool, optional): Whether tertiary vortex data is included
+        data_type (str, optional): Type of data ('PIV' or 'LES'). Default is 'LES', PIV is NOT ACTIVE for now.
     
     Saves:
         Grid data (numpy format):

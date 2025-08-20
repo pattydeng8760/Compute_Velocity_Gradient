@@ -9,7 +9,7 @@ from compute_velocity_gradient_core.velocity_invariant import main
 from compute_velocity_gradient_core.utils import init_logging_from_cut
 
 config = {
-    "cut"        : "PIV1",
+    "cut"        : "PIV2",
     #"parent_dir" : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface",
     #'parent_dir' : "/Volumes/LES Data/B_10AOA_LES/PostProc",
     #"parent_dir" : '/Volumes/LES Data/PIV_Data',

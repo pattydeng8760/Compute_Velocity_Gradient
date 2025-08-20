@@ -211,7 +211,7 @@ def plot_local_invariants_QR(location, R_hat, Q_hat, Vortex_Type: str, data_type
         pdf_norm = pdf / np.max(pdf)
         pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
         
-        # Plot contours
+        # Plot contourså
         color_map = plt.cm.hot.reversed()
         c = axs[i].contourf(x_pdf, y_pdf, pdf_norm.T, levels=np.linspace(0, 0.3, 64), 
                            cmap=color_map, extend='both')
@@ -281,7 +281,7 @@ def plot_local_invariants_Qs_Rs(location, Rs_hat, Qs_hat, Vortex_Type: str, data
         
         # Normalize and smooth PDF
         pdf_norm = pdf / np.max(pdf)
-        pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
+        pdf_norm = gaussian_filter(pdf_norm, sigma=[1.5, 1.5])
         
         # Plot theoretical curves
         Q_plus = np.linspace(0.001, y_lim, 1000)
@@ -353,7 +353,7 @@ def plot_local_invariants_Qs_Qw(location, Qw_hat, Qs_hat, Vortex_Type: str, data
         
         # Normalize and smooth PDF
         pdf_norm = pdf / np.max(pdf)
-        pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
+        pdf_norm = gaussian_filter(pdf_norm, sigma=[1.5, 1.5])
         
         # Plot contours
         x_zero_pdf = np.linspace(x_pdf[0, 0], x_pdf[0, -1], 1000)
