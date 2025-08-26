@@ -252,8 +252,7 @@ class VortexPlot:
         # Get window boundaries based on data type
         if self.data_type == 'PIV':
             from window_bounds import get_window_boundaries_PIV
-            boundaries_dict = get_window_boundaries_PIV()
-            boundaries = boundaries_dict[str(self.angle_of_attack)][self.location]
+            boundaries = get_window_boundaries_PIV(self.location, str(self.angle_of_attack))
             print(f'    PIV window boundaries loaded for location: {self.location}')
         else:
             boundaries = get_window_boundaries(self.location, str(self.angle_of_attack))

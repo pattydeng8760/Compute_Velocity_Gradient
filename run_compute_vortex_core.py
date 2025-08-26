@@ -13,7 +13,7 @@ from compute_vortex_detect_core.utils import init_logging_from_cut
 
 config = {
     "data_type"      : "PIV",
-    "cut"            : "PIV1",
+    "cut"            : "PIV3",
     "parent_dir"     : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data",
     "output_dir"     : ".",
     "nproc"          : 20,
@@ -22,7 +22,7 @@ config = {
     "angle_of_attack": 10,
     "plot"           : True,
     "chord"          : 0.3048,
-    "plot_only"      : True  # Set to True to only generate plots from existing data
+    "plot_only"      : False  # Set to True to only generate plots from existing data
 }
 
 if __name__ == "__main__":

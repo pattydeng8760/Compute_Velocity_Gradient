@@ -116,9 +116,13 @@ def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex,
     vort_line = griddata((y.ravel(), z.ravel()), vort.ravel(), (line_points[:, 0], line_points[:, 1]), method='linear')
     
     with h5py.File(filename, 'a') as f:  # 'a' mode ensures the file is created if it doesn't exist
+        
         if location not in f:
             f.create_group(location)  # Create the group if it does not exist
-        if vortex not in f[location]:
+        if vortex in f[location]: 
+            del f[location][vortex]
+            f[location].create_group(vortex)
+        elif vortex not in f[location]:
             f[location].create_group(vortex)
         
         for name, data in zip(['y','z','r', 'u', 'v', 'w', 'vort'], [x_line, y_line, t, u_line, v_line, w_line, vort_line]):
