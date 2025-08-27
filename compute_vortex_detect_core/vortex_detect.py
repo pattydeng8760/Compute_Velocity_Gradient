@@ -105,6 +105,7 @@ class VortexDetect:
         self.method = args.method
         self.max_file = args.max_file
         self.alpha = args.angle_of_attack
+        self.U_inf = args.velocity
         self.chord = args.chord
         self.plot = args.plot
         self.plot_only = args.plot_only
@@ -156,7 +157,7 @@ class VortexDetect:
             print('\n----> Plot-only mode: Checking for existing data files...')
             if self.check_required_files():
                 print('    All required files found. Generating plots only.')
-                plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
+                plot_all_results(self.cut, self.sol_dir, self.chord, self.U_inf, self.alpha, self.data_type)
                 S_core_loc, S_Vort_Diff, P_core_loc, P_Vort_Diff, T_core_loc, T_Vort_Diff, Vars = None, None, None, None, None, None, None
             else:
                 print('    Error: Required data files not found. Cannot generate plots.')
@@ -187,7 +188,7 @@ class VortexDetect:
             
             # Plot results if requested
             if self.plot:
-                plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
+                plot_all_results(self.cut, self.sol_dir, self.chord, self.U_inf, self.alpha, self.data_type)
         
         elapsed = time.time() - t
         print(f"\n{'Vortex detection analysis complete.':=^100}\n")
@@ -259,7 +260,7 @@ class VortexDetect:
         print('\n----> Generating plots from existing data...')
         
         if self.check_required_files():
-            plot_all_results(self.cut, self.sol_dir, self.chord, self.data_type)
+            plot_all_results(self.cut, self.sol_dir, self.chord, self.U_inf, self.alpha, self.data_type)
             print('    Plot generation completed successfully')
         else:
             print('    Error: Cannot generate plots - required files missing')

@@ -12,14 +12,14 @@ from compute_vortex_detect_core.vortex_detect import main
 from compute_vortex_detect_core.utils import init_logging_from_cut
 
 config = {
-    "data_type"      : "PIV",
+    "data_type"      : "LES",
     "cut"            : "PIV3",
-    "parent_dir"     : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data",
+    "parent_dir"     : "/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_5AOA_LES/Isosurface",
     "output_dir"     : ".",
-    "nproc"          : 20,
-    "method"         : "precise",
+    "nproc"          : 40,
+    "method"         : "area",
     "max_file"       : None,
-    "angle_of_attack": 10,
+    "angle_of_attack": 5,
     "plot"           : True,
     "chord"          : 0.3048,
     "plot_only"      : False  # Set to True to only generate plots from existing data

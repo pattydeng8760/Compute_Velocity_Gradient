@@ -80,7 +80,7 @@ class VelocityInvariant:
         self.nblocks    = args.nblocks
         self.data_type = args.data_type
         self.velocity    = args.velocity
-        self.angle_of_attack = args.angle_of_attack
+        self.angle_of_attack = int(args.angle_of_attack)
         self.limited_gradient = args.limited_gradient
         
         # Update output directory name to include _limited suffix if flag is set

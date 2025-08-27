@@ -8,17 +8,17 @@
 #SBATCH --account=rrg-plavoie
 source /home/p/plavoie/denggua1/.virtualenvs/pdenv/bin/activate
 # Change this to wherever your “compute_velocity_gradient_core” package lives:
-export PYTHONPATH="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/PostProc/Vortex_Detect/Compute_Velocity_Gradient"
+export PYTHONPATH="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_5AOA_LES/PostProc/Compute_Velocity_Gradient"
 
 # Parent directory where your Cut_<cut>_VGT folders live:
-PARENT_DIR="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface"
-
+#PARENT_DIR="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_5AOA_LES/Isosurface"
+PARENT_DIR="/home/p/plavoie/denggua1/scratch/Bombardier_LES/PIV_Data"
 # Number of processes and blocks you want:
 NPROC=40
 NBLOCKS=1200
 
 # List your cuts here:
-CUTS=( "PIV3")
+CUTS=("PIV1" "PIV2" "PIV3")
 
 for CUT in "${CUTS[@]}"; do
   echo "Processing cut: $CUT"
@@ -28,7 +28,9 @@ for CUT in "${CUTS[@]}"; do
     --nproc     "$NPROC" \
     --nblocks   "$NBLOCKS" \
     --output-dir "./" \
-    --limited-gradient
+    --velocity 30 \
+    --data-type "PIV"\
+    --angle-of-attack 5
   echo
 done
 

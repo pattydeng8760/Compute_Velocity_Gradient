@@ -137,7 +137,7 @@ def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex,
     print(f'    Extracted PCA line at {location} for {vortex}.')
     return t, u_line, v_line, w_line, vort_line
 
-def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
+def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, U_inf=30, alpha=10, data_type='LES'):
     """
     Plots and saves the vortex core detection results using advanced visualization methods.
     Loads data from numpy files in the output directory.
@@ -335,7 +335,7 @@ def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, data_type='LES'):
                 bbox_inches='tight', pad_inches=0.2)
     plt.close()
     # Extract PCA line data and save to HDF5
-    filename = os.path.join(f'Velocity_Core_B_10AOA_U30_{data_type}.h5')
+    filename = os.path.join(f'Velocity_Core_B_{alpha}AOA_U{Uinf}_{data_type}.h5')
     extract_pca_line(P_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'PV')
     extract_pca_line(S_core_loc_scaled, y, z, u, v, w, vort, filename, cut_loc, 'SV')
     if tertiary and len(T_core_loc) > 0:
@@ -458,7 +458,7 @@ def plot_probability_distribution(cut_loc, output_dir, data_type='LES', chord=0.
     plt.savefig(os.path.join(output_dir, figname + '.jpeg'), format='jpeg', dpi=600)
     plt.close()
 
-def plot_all_results(cut_loc, output_dir, chord=0.3048, data_type='LES'):
+def plot_all_results(cut_loc, output_dir, chord=0.3048, Uinf=30, alpha=10, data_type='LES'):
     """
     Creates all vortex detection plots and saves them.
     Loads all data from numpy files in the output directory.
@@ -469,7 +469,7 @@ def plot_all_results(cut_loc, output_dir, chord=0.3048, data_type='LES'):
     print(f'    Data type: {data_type}')
     
     # Create main vortex core plot
-    plot_vortex_cores(cut_loc, output_dir, chord, data_type)
+    plot_vortex_cores(cut_loc, output_dir, chord, Uinf, alpha, data_type)
     
     # Create probability distribution plot
     plot_probability_distribution(cut_loc, output_dir, data_type, chord)
