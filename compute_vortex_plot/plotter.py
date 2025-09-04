@@ -281,7 +281,7 @@ def plot_local_invariants_Qs_Rs(location, Rs_hat, Qs_hat, Vortex_Type: str, data
         
         # Normalize and smooth PDF
         pdf_norm = pdf / np.max(pdf)
-        pdf_norm = gaussian_filter(pdf_norm, sigma=[1.5, 1.5])
+        pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
         
         # Plot theoretical curves
         Q_plus = np.linspace(0.001, y_lim, 1000)

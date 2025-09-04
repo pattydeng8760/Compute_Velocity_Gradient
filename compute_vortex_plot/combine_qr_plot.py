@@ -200,7 +200,11 @@ def plot_QsRs_along_vortex(qs, rs, bins=100, set_lim=None, vortex_group='PV', ou
         # Normalize and apply Gaussian filter
         if np.max(pdf) > 0:
             pdf_norm = pdf / np.max(pdf)
+<<<<<<< HEAD
             pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
+=======
+            pdf_norm = gaussian_filter(pdf_norm, sigma=[2, 2])
+>>>>>>> 51a414022c7d52096dcd37025fed00d442253e35
             
             # Plot contours
             color_map = plt.cm.hot.reversed()
