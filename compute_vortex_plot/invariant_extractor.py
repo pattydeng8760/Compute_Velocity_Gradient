@@ -211,6 +211,11 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     Rs = extract_variable_data_stacked(data['Rs_all'], closest_indices, adjacent_points_list, data_type)
     Qs = extract_variable_data_stacked(data['Qs_all'], closest_indices, adjacent_points_list, data_type)
     Qw = extract_variable_data_stacked(data['Qw_all'], closest_indices, adjacent_points_list, data_type)
+    vort_x = extract_variable_data_stacked(data['vort_x'], closest_indices, adjacent_points_list, data_type)
+    pressure = extract_variable_data_stacked(data['pressure'], closest_indices, adjacent_points_list, data_type)
+    u_vel = extract_variable_data_stacked(data['u'], closest_indices, adjacent_points_list, data_type)
+    v_vel = extract_variable_data_stacked(data['v'], closest_indices, adjacent_points_list, data_type)
+    w_vel = extract_variable_data_stacked(data['w'], closest_indices, adjacent_points_list, data_type)
     
     # Extract mean values for normalization
     var_A = extract_mean_variable(data['var_A'], closest_indices, adjacent_points_list, data_type)
@@ -227,6 +232,8 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     plot_local_invariants_QR(location, Rhat, Qhat, Vortex_Type, data_type, limited_gradient = limited_gradient)
     plot_local_invariants_Qs_Rs(location, Rs, Qs, Vortex_Type, data_type, limited_gradient = limited_gradient)
     plot_local_invariants_Qs_Qw(location, Qw, Qs, Vortex_Type, data_type, limited_gradient = limited_gradient)
+    
+    # Generate spectra of velocity and pressure
     
     # Save extracted data
     save_extracted_data(location, Phat, Qhat, Rhat, Qs, Qw, Rs, Vortex_Type, data_type, velocity, angle_of_attack, limited_gradient)

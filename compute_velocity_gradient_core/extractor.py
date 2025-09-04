@@ -69,7 +69,10 @@ def extract_gradient(arr, cut, reload:bool=False, output:str='./', time:int=None
             if 'rho' not in b[0][0] or data_type == 'PIV':
                 b[0][0]['rho'] = np.ones_like(b[0][0]['u'])
                 b[0][0]['rho'] *= 1.225  # Constant density of air at sea level
-            for i, key in enumerate([('u', 'node'), ('v', 'node'), ('w', 'node'),('rho', 'node'),('vort_x', 'node')]):
+            if 'pressure' not in b[0][0] or data_type == 'PIV':
+                b[0][0]['pressure'] = np.ones_like(b[0][0]['u'])
+                b[0][0]['pressure'] *= 101325
+            for i, key in enumerate([('u', 'node'), ('v', 'node'), ('w', 'node'),('rho', 'node'),('vort_x', 'node'),('pressure', 'node')]):
                 velocity[i][:, idx] = b[0][0][key]
             # Extract the velocity gradient tensor
             for i, key in enumerate(VGT_keys):

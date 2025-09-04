@@ -25,6 +25,7 @@ def load_velocity_invariants(location, data_type='LES', limited_gradient=False):
         data['v'] = f['v'][:]
         data['w'] = f['w'][:]
         data['vort_x'] = f['vort_x'][:]
+        data['pressure'] = f['pressure'][:]
         data['pressure_hessian'] = f['pressure_hessian'][:]
         data['var_A'] = f['Variance A'][:]
         data['var_S'] = f['Variance S'][:]
