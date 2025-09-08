@@ -63,6 +63,7 @@ def save_output_main(node,node_indices,time,results,arr,output,velocity,cut,limi
         f.create_dataset('u', data=velocity[0], dtype='float32')
         f.create_dataset('v', data=velocity[1], dtype='float32')
         f.create_dataset('w', data=velocity[2], dtype='float32')
+        f.create_dataset('pressure', data=velocity[5], dtype='float32')
     print('    Full PQR saved to {0:s}.'.format(output_file))
     #print('\n---->File saving complete.')
 

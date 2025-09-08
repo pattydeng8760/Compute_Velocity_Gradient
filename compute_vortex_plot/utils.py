@@ -2,7 +2,11 @@ import os
 import sys
 import time
 import logging
+import numpy as np
 from functools import wraps
+from scipy.signal import welch
+from scipy.signal.windows import hann
+import matplotlib.pyplot as plt
 
 def print(*args, **kwargs):
     """Custom print function that also logs to file."""
@@ -39,3 +43,34 @@ def timer(func):
         print(f"The total compute time is: {int(time.time() - start)} s")
         return result
     return inner
+
+def _next_greater_power_of_2(n: int) -> int:
+    return 1 if n <= 1 else 1 << (int(n - 1).bit_length())
+
+def _welch_psd(x, dt, nchunk:int=1):
+    x = np.asarray(x).ravel()
+    fs = 1.0 / dt
+    lensg = len(x)
+    nperseg = int(lensg / nchunk)
+    nfft = _next_greater_power_of_2(nperseg)   
+    f, Pxx = welch(x, fs=fs, window='hamming', nperseg=nperseg, nfft=nfft, scaling='density')
+    return f, Pxx
+
+
+def _setup_plot_params():
+    """Setup matplotlib parameters for consistent plot styling."""
+    SMALL_SIZE = 14
+    MEDIUM_SIZE = 18
+    LARGE_SIZE = 22
+    
+    plt.rcParams.update({
+        'font.size': MEDIUM_SIZE,
+        'axes.titlesize': MEDIUM_SIZE,
+        'axes.labelsize': MEDIUM_SIZE,
+        'xtick.labelsize': MEDIUM_SIZE,
+        'ytick.labelsize': MEDIUM_SIZE,
+        'legend.fontsize': SMALL_SIZE,
+        'figure.titlesize': LARGE_SIZE,
+        'mathtext.fontset': 'stix',
+        'font.family': 'STIXGeneral',
+    })

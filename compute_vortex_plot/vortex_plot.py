@@ -2,12 +2,15 @@ import os
 import sys
 import numpy as np
 import argparse
-from .utils import timer, print, init_logging_from_cut
+import matplotlib.pyplot as plt
+from .utils import timer, print, init_logging_from_cut, _setup_plot_params
 from .data_loader import load_velocity_invariants, load_connectivity
 from .grid_maker import make_grid
 from .vortex_detector import vortex, piv_vortex
 from .invariant_extractor import extract_velocity_invariants
-from .plotter import plot_global_invariants, plot_vortex_profiles
+from .single_plot import plot_global_invariants, plot_vortex_profiles, plot_spectra
+from .combine_spectra_plot import plot_combine_spectra
+from .combine_qr_plot import plot_combine_qr
 from .data_saver import save_extracted_data
 from window_bounds import get_window_boundaries
 
@@ -92,6 +95,13 @@ def parse_arguments():
         help="List of locations for combined Q-R plotting (e.g., --locations 030_TE PIV1 PIV2 085_TE 095_TE PIV3). If not specified, default locations will be used based on data type."
     )
     
+    parser.add_argument(
+        "--time-step", "-dt",
+        type=float,
+        default=0.186e-8*2000,
+        help="Time step between frames in seconds for the full solution (default: 0.186e-8*2000)."
+    )
+    
     return parser.parse_args()
 
 class VortexPlot:
@@ -108,7 +118,7 @@ class VortexPlot:
         self.limited_gradient = args.limited_gradient
         self.plot_all = args.plot_all
         self.locations = args.locations
-        
+        self.dt = args.time_step
         # Set default locations based on data type if not specified
         if self.locations is None:
             if self.data_type.upper() == 'LES':
@@ -125,23 +135,6 @@ class VortexPlot:
             self.output_dir += '_Limited'
             print("Using limited gradient computation for LES data, the output directory is set to:", self.output_dir)
         os.makedirs(self.output_dir, exist_ok=True)
-    
-    def setup_rcparams(self):
-        import matplotlib.pyplot as plt
-        SMALL_SIZE = 12
-        MEDIUM_SIZE = 18
-        LARGE_SIZE = 22
-        plt.rcParams.update({
-            'font.size': MEDIUM_SIZE,
-            'axes.titlesize': MEDIUM_SIZE,
-            'axes.labelsize': MEDIUM_SIZE,
-            'xtick.labelsize': MEDIUM_SIZE,
-            'ytick.labelsize': MEDIUM_SIZE,
-            'legend.fontsize': SMALL_SIZE,
-            'figure.titlesize': LARGE_SIZE,
-            'mathtext.fontset': 'stix',
-            'font.family': 'STIXGeneral',
-        })
     
     def load_data(self):
         print('\n----> Loading velocity invariants data...')
@@ -366,7 +359,7 @@ class VortexPlot:
         print('        Radius: 0.01, Layers: 2, Angle range: 0-180°')
         self.loc_points_PV = extract_velocity_invariants(
             self.data, self.connectivity, self.P_Vortex, 
-            location=self.location, Vortex_Type="PV",
+            location=self.location, Vortex_Type="PV", dt = self.dt,
             radius=0.01, n_layers=2, start_angle=0, end_angle=180,
             data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
             limited_gradient=self.limited_gradient
@@ -377,7 +370,7 @@ class VortexPlot:
         print('        Radius: 0.007, Layers: 2, Angle range: -90-90°')
         self.loc_points_SV = extract_velocity_invariants(
             self.data, self.connectivity, self.S_Vortex, 
-            location=self.location, Vortex_Type="SV",
+            location=self.location, Vortex_Type="SV", dt = self.dt,
             radius=0.002, n_layers=1, start_angle=-90, end_angle=90,
             data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
             limited_gradient=self.limited_gradient
@@ -392,7 +385,7 @@ class VortexPlot:
             print('        Radius: 0.007, Layers: 2, Angle range: 0-180°')
             loc_points_TV = extract_velocity_invariants(
                 self.data, self.connectivity, self.T_Vortex, 
-                location=self.location, Vortex_Type="TV",
+                location=self.location, Vortex_Type="TV", dt = self.dt,
                 radius=0.007, n_layers=2, start_angle=0, end_angle=180,
                 data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
                 limited_gradient=self.limited_gradient
@@ -407,7 +400,7 @@ class VortexPlot:
             print(f'        Radius: {shear_radius}, Layers: 2, Angle range: -90-90°')
             loc_points_SS = extract_velocity_invariants(
                 self.data, self.connectivity, self.SS_shear, 
-                location=self.location, Vortex_Type="SS_shear",
+                location=self.location, Vortex_Type="SS_shear", dt = self.dt,
                 radius=shear_radius, n_layers=2, start_angle=-90, end_angle=90,
                 data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
                 limited_gradient=self.limited_gradient
@@ -422,7 +415,7 @@ class VortexPlot:
             print(f'        Radius: {shear_radius}, Layers: 2, Angle range: 0-180°')
             loc_points_PS = extract_velocity_invariants(
                 self.data, self.connectivity, self.PS_shear, 
-                location=self.location, Vortex_Type="PS_shear",
+                location=self.location, Vortex_Type="PS_shear", dt = self.dt,
                 radius=shear_radius, n_layers=2, start_angle=0, end_angle=180,
                 data_type=self.data_type, velocity = self.velocity, angle_of_attack = self.angle_of_attack,
                 limited_gradient=self.limited_gradient
@@ -473,13 +466,16 @@ class VortexPlot:
             data_type=self.data_type, limited_gradient = self.limited_gradient
         )
         
-        print('    Plot generation complete.')
-    
+        if self.data_type == 'LES' and self.limited_gradient == False:
+            print('    Generating Spectral Plots...')
+            self.spectra_file = "Velocity_Spectra_Core_B_{}AOA_U{}_{}.h5".format(self.angle_of_attack, self.velocity, self.data_type)
+            plot_spectra(self.spectra_file, self.location, self.data_type, nchunk=8, xlim_vel=(50,5e4), xlim_p=(50,5e4), xlim_vort=(50,5e4), xlim_tke=(50,5e4))
+            print('    Plot generation complete.')
+        
     def generate_combined_plots(self):
         """Generate combined Q-R plots across multiple locations."""
-        from .combine_qr_plot import generate_combined_qr_plots
-        
-        print('\n----> Generating combined Q-R plots...')
+        self.spectra_file = "Velocity_Spectra_Core_B_{}AOA_U{}_{}.h5".format(self.angle_of_attack, self.velocity, self.data_type)
+        print('\n----> Generating combined Q-R plots along core...')
         print(f'    Locations: {self.locations}')
         print(f'    Data type: {self.data_type}')
         
@@ -488,17 +484,18 @@ class VortexPlot:
         if self.limited_gradient and self.data_type == 'LES':
             output_dir += '_Limited'
         
-        generate_combined_qr_plots(
-            locations=self.locations,
-            data_type=self.data_type,
-            velocity=self.velocity,
-            angle_of_attack=self.angle_of_attack,
-            bins=100,
-            output_dir=output_dir,
-            limited_gradient=self.limited_gradient
-        )
+        plot_combine_qr(locations=self.locations,data_type=self.data_type,velocity=self.velocity,angle_of_attack=self.angle_of_attack,
+            bins=100,output_dir=output_dir,limited_gradient=self.limited_gradient)
         
         print('    Combined Q-R plot generation complete.')
+        
+        if self.limited_gradient == False and self.data_type == 'LES':
+            print('\n----> Generating combined spectral plots along core...')
+            print(f'    Locations: {self.locations}')
+            print(f'    Spectra File: {self.spectra_file}')
+            plot_combine_spectra(data_file = self.spectra_file,locations = self.locations,variables=('u','v','w','pressure','vort_x'),
+                num_features=825, nchunk=3, output_dir = output_dir, plot_ref_slope=True)
+            print('    Combined spectra plot generation complete.')
     
     @timer
     def run(self):
@@ -522,7 +519,7 @@ class VortexPlot:
         
         # Setup plotting parameters
         print('\n----> Setting up plotting parameters...')
-        self.setup_rcparams()
+        _setup_plot_params()
         print('    Matplotlib parameters configured.')
         
         # Main processing steps

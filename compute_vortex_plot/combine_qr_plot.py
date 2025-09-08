@@ -9,26 +9,7 @@ from scipy.ndimage import binary_dilation
 import h5py
 from scipy.interpolate import griddata
 import matplotlib.colors as mcolors
-from .utils import print
-
-
-def setup_plot_params():
-    """Setup matplotlib parameters for consistent plot styling."""
-    SMALL_SIZE = 12
-    MEDIUM_SIZE = 18
-    LARGE_SIZE = 22
-    
-    plt.rcParams.update({
-        'font.size': MEDIUM_SIZE,
-        'axes.titlesize': MEDIUM_SIZE,
-        'axes.labelsize': MEDIUM_SIZE,
-        'xtick.labelsize': MEDIUM_SIZE,
-        'ytick.labelsize': MEDIUM_SIZE,
-        'legend.fontsize': SMALL_SIZE,
-        'figure.titlesize': LARGE_SIZE,
-        'mathtext.fontset': 'stix',
-        'font.family': 'STIXGeneral',
-    })
+from .utils import print,_setup_plot_params
 
 
 def get_data_file_path(data_type, velocity=30, angle_of_attack=10, limited_gradient=False, check_exists:bool = True):
@@ -76,7 +57,7 @@ def extract_QR_data(data_file, locations, vortex, num_features):
     return np.array(q), np.array(qs), np.array(qw), np.array(r), np.array(rs)
 
 
-def plot_QR_along_vortex(q, r, bins=100, set_lim=None, vortex_group='PV', output_dir='QR_Plots'):
+def plot_QR_along_vortex(q, r, bins=100, set_lim=None, vortex_group='PV', output_dir='QR_Plots',AoA:int=10, Uinf:int=30):
     """Plot Q-R invariant contours along vortex locations."""
     if r.shape[0] == 0:
         print(f"Warning: No data found for vortex group {vortex_group}")
@@ -147,13 +128,13 @@ def plot_QR_along_vortex(q, r, bins=100, set_lim=None, vortex_group='PV', output
     fig.tight_layout()
     
     # Save plot
-    figname = os.path.join(output_dir, f'B_10AOA_{vortex_group}_Cores_horizontal')
+    figname = os.path.join(output_dir, f'B_{AoA}AOA_U{Uinf}_{vortex_group}_Cores_horizontal')
     plt.savefig(figname + '.jpeg', format='jpeg', dpi=600)
     plt.savefig(figname + '.eps', format='eps', dpi=600)
     plt.close()
 
 
-def plot_QsRs_along_vortex(qs, rs, bins=100, set_lim=None, vortex_group='PV', output_dir='QR_Plots'):
+def plot_QsRs_along_vortex(qs, rs, bins=100, set_lim=None, vortex_group='PV', output_dir='QR_Plots',AoA:int=10, Uinf:int=30):
     """Plot Qs-Rs strain tensor invariant contours along vortex locations."""
     if rs.shape[0] == 0:
         print(f"Warning: No data found for vortex group {vortex_group}")
@@ -200,12 +181,7 @@ def plot_QsRs_along_vortex(qs, rs, bins=100, set_lim=None, vortex_group='PV', ou
         # Normalize and apply Gaussian filter
         if np.max(pdf) > 0:
             pdf_norm = pdf / np.max(pdf)
-<<<<<<< HEAD
             pdf_norm = gaussian_filter(pdf_norm, sigma=[2.5, 2.5])
-=======
-            pdf_norm = gaussian_filter(pdf_norm, sigma=[2, 2])
->>>>>>> 51a414022c7d52096dcd37025fed00d442253e35
-            
             # Plot contours
             color_map = plt.cm.hot.reversed()
             c = axs[i].contourf(x_pdf, y_pdf, pdf_norm.T, levels=np.linspace(0, 0.3, 64), 
@@ -230,13 +206,13 @@ def plot_QsRs_along_vortex(qs, rs, bins=100, set_lim=None, vortex_group='PV', ou
     fig.tight_layout()
     
     # Save plot
-    figname = os.path.join(output_dir, f'B_10AOA_{vortex_group}_Cores_Qs_Rs_horizontal')
+    figname = os.path.join(output_dir, f'B_{AoA}AOA_U{Uinf}_{vortex_group}_Cores_Qs_Rs_horizontal')
     plt.savefig(figname + '.eps', format='eps', dpi=600)
     plt.savefig(figname + '.jpeg', format='jpeg', dpi=600)
     plt.close()
 
 
-def plot_QsQw_along_vortex(qs, qw, bins=100, set_lim=None, vortex_group='PV', output_dir='QR_Plots'):
+def plot_QsQw_along_vortex(qs, qw, bins=100, set_lim=None, vortex_group='PV', output_dir='QR_Plots', AoA:int=10, Uinf:int=30):
     """Plot Qs-Qw strain-vorticity invariant contours along vortex locations."""
     if qs.shape[0] == 0:
         print(f"Warning: No data found for vortex group {vortex_group}")
@@ -309,13 +285,13 @@ def plot_QsQw_along_vortex(qs, qw, bins=100, set_lim=None, vortex_group='PV', ou
     fig.tight_layout()
 
     # Save plot
-    figname = os.path.join(output_dir, f'B_10AOA_{vortex_group}_Cores_Qw_Qs_horizontal')
+    figname = os.path.join(output_dir, f'B_{AoA}AOA_U{Uinf}_{vortex_group}_Cores_Qw_Qs_horizontal')
     plt.savefig(figname + '.eps', format='eps', dpi=600)
     plt.savefig(figname + '.jpeg', format='jpeg', dpi=600)
     plt.close()
 
 
-def generate_combined_qr_plots(locations, data_type='LES', velocity=30, angle_of_attack=10, 
+def plot_combine_qr(locations, data_type='LES', velocity=30, angle_of_attack=10, 
                              bins=100, output_dir='QR_Plots', limited_gradient=False):
     """
     Generate combined Q-R plots for all vortex types across specified locations.
@@ -342,7 +318,7 @@ def generate_combined_qr_plots(locations, data_type='LES', velocity=30, angle_of
     print(f"    Output directory: {output_dir}")
     
     # Setup plotting parameters
-    setup_plot_params()
+    _setup_plot_params()
     
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
@@ -392,18 +368,18 @@ def generate_combined_qr_plots(locations, data_type='LES', velocity=30, angle_of
         
         # Generate Q-R plots
         plot_QR_along_vortex(q, r, bins=bins, set_lim=config['set_lim'], 
-                            vortex_group=vortex_type, output_dir=output_dir)
+                            vortex_group=vortex_type, output_dir=output_dir, AoA=angle_of_attack, Uinf=velocity)
         plots_generated += 1
         
         # Generate Qs-Rs plots
         plot_QsRs_along_vortex(qs, rs, bins=bins, set_lim=None, 
-                              vortex_group=vortex_type, output_dir=output_dir)
+                              vortex_group=vortex_type, output_dir=output_dir, AoA=angle_of_attack, Uinf=velocity)
         plots_generated += 1
         
         # Generate Qs-Qw plots
         qsqw_lim = qsqw_limits.get(vortex_type)
         plot_QsQw_along_vortex(qs, qw, bins=bins, set_lim=qsqw_lim, 
-                              vortex_group=vortex_type, output_dir=output_dir)
+                              vortex_group=vortex_type, output_dir=output_dir, AoA=angle_of_attack, Uinf=velocity)
         plots_generated += 1
         
         print(f"        Generated 3 plot types for {vortex_type}")

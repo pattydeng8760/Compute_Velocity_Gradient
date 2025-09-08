@@ -16,13 +16,14 @@ from compute_vortex_plot.utils import init_logging_from_cut
 
 # Configuration dictionary with default parameters
 config = {
-    "cut"              : "095_TE",                # Cutplane identifier
+    "cut"              : "PIV3",                # Cutplane identifier
     "data_type"        : "LES",                 # Data type: 'LES' or 'PIV'
     "chord"            : 0.305,                 # Chord length for normalization
     "velocity"         : 30,                    # Free stream velocity
-    "angle_of_attack"  : 5,                    # Angle of attack in degrees
+    "angle_of_attack"  : 10,                    # Angle of attack in degrees
     "grid_size"        : 500,                   # Grid size for interpolation
     "pca_points"       : 100,                   # Number of PCA query points
+    "time_step"        : 0.186e-7*2000,                  # Specific time step to analyze
     "pca_length"       : 0.012,                 # PCA line length
     "limited_gradient" : False,                # Use limited gradient
     "plot_all"         : True,                 # Plot all data"

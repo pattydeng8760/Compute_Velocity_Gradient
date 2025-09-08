@@ -1,5 +1,7 @@
 import numpy as np
-from .plotter import plot_local_invariants_QR, plot_local_invariants_Qs_Rs, plot_local_invariants_Qs_Qw
+import os
+import h5py
+from .single_plot import plot_local_invariants_QR, plot_local_invariants_Qs_Rs, plot_local_invariants_Qs_Qw, plot_spectra
 from .data_saver import save_extracted_data
 from .utils import print
 
@@ -154,7 +156,7 @@ def extract_mean_variable(variable_all, core_indices, adjacent_points_list, data
     
     return np.array(averaged_list)
 
-def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vortex_Type: str, 
+def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vortex_Type: str, dt:float,
                                radius=0.01, n=6, n_layers=2, start_angle=0, end_angle=180, 
                                data_type: str = 'LES', velocity:int=30, angle_of_attack:int=10,
                                limited_gradient: bool = False):
@@ -233,8 +235,25 @@ def extract_velocity_invariants(data, connectivity, Vortex, location: str, Vorte
     plot_local_invariants_Qs_Rs(location, Rs, Qs, Vortex_Type, data_type, limited_gradient = limited_gradient)
     plot_local_invariants_Qs_Qw(location, Qw, Qs, Vortex_Type, data_type, limited_gradient = limited_gradient)
     
-    # Generate spectra of velocity and pressure
-    
+    # create an hdf5 file to store and calculate the spectra data later
+    spectra_file = "Velocity_Spectra_Core_B_{}AOA_U{}_{}.h5".format(angle_of_attack, velocity,data_type)
+    print(f"        Spectra data will be saved to: {spectra_file}")
+    with h5py.File(spectra_file, 'a') as f:
+        # Ensure the location group exists
+        if location not in f:
+            f.create_group(location)
+        # Create the Vortex_Type subgroup under the location group if it does not already exist
+        if Vortex_Type not in f[location]:
+            f[location].create_group(Vortex_Type)
+        f[location][Vortex_Type].attrs['dt'] = dt
+        # Save each dataset under the Vortex_Type subgroup
+        for name, dat in zip(['u', 'v', 'w', 'vort_x', 'pressure'],
+                             [u_vel , v_vel , w_vel , vort_x , pressure]):
+            # If the dataset already exists, remove it
+            if name in f[location][Vortex_Type]:
+                del f[location][Vortex_Type][name]
+            f[location][Vortex_Type].create_dataset(name, data=dat)
+    print(f"        Spectra data saved.")
     # Save extracted data
     save_extracted_data(location, Phat, Qhat, Rhat, Qs, Qw, Rs, Vortex_Type, data_type, velocity, angle_of_attack, limited_gradient)
     

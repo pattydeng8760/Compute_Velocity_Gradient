@@ -24,7 +24,7 @@ compute_vortex_plot/
 ├── grid_maker.py            # Grid interpolation utilities
 ├── vortex_detector.py       # Vortex detection algorithms
 ├── invariant_extractor.py   # Velocity invariant extraction
-├── plotter.py               # Plot generation utilities
+├── single_plotter.py               # Plot generation utilities
 ├── data_saver.py            # Save extracted data to HDF5
 └── README.md                # This file
 ```

@@ -21,6 +21,7 @@ Usage:
 import sys
 sys.path.insert(0, "/project/p/plavoie/denggua1/Coordinates")
 from .vortex_plot import VortexPlot, parse_arguments
+from .data_loader import load_velocity_invariants, load_connectivity
 from .utils import init_logging_from_cut, timer, print
 
 # Version and metadata
