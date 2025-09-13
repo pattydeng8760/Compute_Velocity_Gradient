@@ -137,7 +137,7 @@ def extract_pca_line(core_locs, y, z, u, v, w, vort, filename, location, vortex,
     print(f'    Extracted PCA line at {location} for {vortex}.')
     return t, u_line, v_line, w_line, vort_line
 
-def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, U_inf=30, alpha=10, data_type='LES'):
+def plot_vortex_cores(cut_loc, output_dir, chord=0.3048, Uinf=30, alpha=10, data_type='LES'):
     """
     Plots and saves the vortex core detection results using advanced visualization methods.
     Loads data from numpy files in the output directory.

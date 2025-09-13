@@ -96,6 +96,13 @@ def parse_arguments():
     )
     
     parser.add_argument(
+        "--plot-spectra", "-ps",
+        type=float,
+        default=0.186e-8*2000,
+        help="Time plotting the spectra content at the core positions."
+    )
+        
+    parser.add_argument(
         "--time-step", "-dt",
         type=float,
         default=0.186e-8*2000,
@@ -117,6 +124,7 @@ class VortexPlot:
         self.pca_length = args.pca_length
         self.limited_gradient = args.limited_gradient
         self.plot_all = args.plot_all
+        self.plot_spectra = args.plot_spectra
         self.locations = args.locations
         self.dt = args.time_step
         # Set default locations based on data type if not specified
@@ -489,7 +497,7 @@ class VortexPlot:
         
         print('    Combined Q-R plot generation complete.')
         
-        if self.limited_gradient == False and self.data_type == 'LES':
+        if self.limited_gradient == False and self.data_type == 'LES' and self.plot_spectra == True:
             print('\n----> Generating combined spectral plots along core...')
             print(f'    Locations: {self.locations}')
             print(f'    Spectra File: {self.spectra_file}')
@@ -515,6 +523,9 @@ class VortexPlot:
         print(f'    PCA query points: {self.pca_points}')
         print(f'    PCA line length: {self.pca_length} m')
         print(f'    Plot all: {self.plot_all}')
+        print(f'    Limited gradient (LES only): {self.limited_gradient}')
+        print(f'    Time step between frames (LES only): {self.dt} s')
+        print(f'    Plot spectra (LES only): {self.plot_spectra}')
         print(f'    Locations: {self.locations}')
         
         # Setup plotting parameters
