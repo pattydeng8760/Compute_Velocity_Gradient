@@ -111,10 +111,10 @@ def save_output_strain(node,node_indices,time,results,arr,output,velocity,cut,li
     
     #print('Saving Full Qs, Rs, Qw')
     # Saving the full VGT result as h5 file
-    filename = 'Velocity_Invariants_' + cut + '.h5'
+    filename = 'Velocity_Invariants_' + cut
     if limited_gradient:
         filename += '_Limited'
-    output_file = os.path.join(output, filename)
+    output_file = os.path.join(output, filename+ '.h5')
     with h5py.File(output_file, 'a') as f:
         f.create_dataset('Qs', data=Qs, dtype='float32')
         f.create_dataset('Rs', data=Rs, dtype='float32')
