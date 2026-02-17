@@ -9,26 +9,26 @@ from argparse import Namespace
 # Add the current directory to Python path to ensure module can be imported
 sys.path.insert(0, ".")
 # Add window bounds to sys.path
-sys.path.insert(0, "/project/p/plavoie/denggua1/Coordinates")
+sys.path.insert(0, "/project/rrg-plavoie/denggua1/Coordinates")
 
 from compute_vortex_plot.vortex_plot import VortexPlot
 from compute_vortex_plot.utils import init_logging_from_cut
 
 # Configuration dictionary with default parameters
 config = {
-    "cut"              : "PIV1",                # Cutplane identifier
+    "cut"              : "PIV3",                # Cutplane identifier
     "data_type"        : "LES",                 # Data type: 'LES' or 'PIV'
     "chord"            : 0.305,                 # Chord length for normalization
-    "velocity"         : 30,                    # Free stream velocity
-    "angle_of_attack"  : 5,                    # Angle of attack in degrees
+    "velocity"         : 50,                    # Free stream velocity
+    "angle_of_attack"  : 10,                    # Angle of attack in degrees
     "grid_size"        : 500,                   # Grid size for interpolation
     "pca_points"       : 100,                   # Number of PCA query points
-    "time_step"        : 0.186e-7*2000,                  # Specific time step to analyze
+    "time_step"        : 0.122e-7*2000,                  # Specific time step to analyze
     "pca_length"       : 0.012,                 # PCA line length
-    "limited_gradient" : False,                # Use limited gradient
+    "limited_gradient" : True,                # Use limited gradient
     "plot_all"         : True,                 # Plot all data"
-    "plot_spectra"     : False,                 # Plot spectra
-    "locations"        : ['030_TE', 'PIV1', 'PIV2','085_TE','095_TE', 'PIV3'],           # Locations to analyze
+    "plot_spectra"     : True,                 # Plot spectra
+    "locations"        : ['PIV1', 'PIV2', 'PIV3'],           # Locations to analyze
 }
 
 def main():

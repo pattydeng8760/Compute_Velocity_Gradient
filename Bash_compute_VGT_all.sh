@@ -1,24 +1,24 @@
 #!/bin/bash 
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=10
-#SBATCH --time=0-01:00
-#SBATCH --job-name=QR_A10
+#SBATCH --ntasks-per-node=40
+#SBATCH --time=0-13:59
+#SBATCH --job-name=QR_A10U50
 #SBATCH --mail-user=patrickgc.deng@mail.utoronto.ca
 #SBATCH --mail-type=ALL
 #SBATCH --account=rrg-plavoie
-source /home/p/plavoie/denggua1/.virtualenvs/pdenv/bin/activate
+source /project/rrg-plavoie/denggua1/pd_env.sh
 # Change this to wherever your “compute_velocity_gradient_core” package lives:
-export PYTHONPATH="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/PostProc/Compute_Velocity_Gradient"
+export PYTHONPATH="/scratch/denggua1/Bombardier_LES/B_10AOA_U50_LES/PostProc_Fine/Compute_Velocity_Gradient"
 
 # Parent directory where your Cut_<cut>_VGT folders live:
 #PARENT_DIR="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_5AOA_LES/Isosurface"
-PARENT_DIR="/home/p/plavoie/denggua1/scratch/Bombardier_LES/B_10AOA_LES/Isosurface"
+PARENT_DIR="/scratch/denggua1/Bombardier_LES/B_10AOA_U50_LES/Isosurface/Extract_Cutplane_Fine"
 # Number of processes and blocks you want:
-NPROC=10
+NPROC=40
 NBLOCKS=1200
 
 # List your cuts here:
-CUTS=( "095_TE")
+CUTS=("030_TE" "PIV1" "PIV2" "085_TE" "095_TE" "PIV3")
 
 for CUT in "${CUTS[@]}"; do
   echo "Processing cut: $CUT"

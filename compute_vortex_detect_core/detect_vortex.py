@@ -68,7 +68,7 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
             # Extract data
             y_file = base['0000']['0000']['y']
             z_file = base['0000']['0000']['z']
-            vort_x = base['0000']['0000']['vort_x'] * 0.305 / 30
+            vort_x = base['0000']['0000']['vort_x'] * 0.305 / 50
             u = base['0000']['0000']['u']
             v_val = base['0000']['0000']['v']
             w = base['0000']['0000']['w']
@@ -82,8 +82,8 @@ def process_file_block(file_block, SV_WindowLL, SV_WindowUR, PV_WindowLL, PV_Win
                     print(f"Block {block_num}: 'y' and 'z' differ in file {file_path}. Using the first file's 'y' and 'z'.")
             
             # Initialize vortex objects
-            S_Vortex = vortex('Secondary', SV_WindowLL, SV_WindowUR, y, z, u, vort_x, 'area', -18)
-            P_Vortex = vortex('Primary', PV_WindowLL, PV_WindowUR, y, z, u, vort_x, 'area', -18)
+            S_Vortex = vortex('Secondary', SV_WindowLL, SV_WindowUR, y, z, u, vort_x, 'area', -15)
+            P_Vortex = vortex('Primary', PV_WindowLL, PV_WindowUR, y, z, u, vort_x, 'area', -15)
             if cut_loc != 'PIV1' and cut_loc != '030_TE' and cut_loc != '040_TE' and cut_loc != '050_TE' and cut_loc != '060_TE' and cut_loc != '070_TE':
                 flag_tertiary = True
             else:
